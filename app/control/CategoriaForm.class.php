@@ -22,12 +22,15 @@ class CategoriaForm extends TPage
         
         $id   = new TEntry('id');
         $nome = new TEntry('nome');
+        $descricao = new TEntry('descricao');
 
         $id->setEditable(FALSE);
         $nome->setSize('100%');
+        $descricao->setSize('100%');
 
         $this->form->addFields( [new TLabel('ID')],    [$id] );
         $this->form->addFields( [new TLabel('Nome')],  [$nome] );
+        $this->form->addFields( [new TLabel('Descrição')],  [$descricao] );
 
         // Save button
         $this->form->addAction('Salvar', new TAction([$this, 'onSave']), 'fas:save');

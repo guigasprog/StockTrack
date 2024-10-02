@@ -12,6 +12,11 @@
                 <action>ProdutoForm</action>
             </menuitem>
             
+            <menuitem label='Categoria'>
+                <icon>fas:tag fa-fw</icon>
+                <action>CategoriaForm</action>
+            </menuitem>
+            
             <menuitem label='Estoque'>
                 <icon>fas:boxes fa-fw</icon>
                 <action>EstoqueForm</action>
