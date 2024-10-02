@@ -17,6 +17,14 @@ CREATE TABLE clientes (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE categorias (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
 CREATE TABLE produtos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nome VARCHAR(100) NOT NULL,
@@ -25,6 +33,11 @@ CREATE TABLE produtos (
     quantidade INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE produtos 
+ADD COLUMN categoria_id INT,
+ADD CONSTRAINT fk_categoria_produto
+FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE SET NULL;
 
 CREATE TABLE pedidos (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -55,28 +68,34 @@ CREATE TABLE estoque (
 
 -- INSERINDO DADOS
 
+INSERT INTO categorias (nome) VALUES
+('Categoria A'),
+('Categoria B'),
+('Categoria C');
+
 INSERT INTO clientes (nome, email, telefone, endereco) VALUES
 ('Maria Silva', 'maria.silva@example.com', '9999-9999', 'Rua A, 123'),
 ('João Pereira', 'joao.pereira@example.com', '9888-8888', 'Avenida B, 456'),
 ('Ana Costa', 'ana.costa@example.com', '9777-7777', 'Travessa C, 789');
 
-INSERT INTO produtos (nome, descricao, preco, quantidade) VALUES
-('Produto 1', 'Descrição do Produto 1', 29.90, 50),
-('Produto 2', 'Descrição do Produto 2', 19.99, 30),
-('Produto 3', 'Descrição do Produto 3', 39.50, 20);
+INSERT INTO produtos (nome, descricao, preco, quantidade, categoria_id) VALUES
+('Produto 1', 'Descrição do Produto 1', 29.90, 50, 1),
+('Produto 2', 'Descrição do Produto 2', 19.99, 30, 2),
+('Produto 3', 'Descrição do Produto 3', 39.50, 20, 3);
 
 INSERT INTO pedidos (cliente_id, total, status) VALUES
-(1, 59.80, 'concluído'),  -- Total do Pedido 1
-(2, 19.99, 'pendente'),   -- Total do Pedido 2
-(1, 39.50, 'cancelado');  -- Total do Pedido 3
+(1, 59.80, 'concluído'),
+(2, 19.99, 'pendente'),
+(1, 39.50, 'cancelado');
 
 INSERT INTO itens_pedido (pedido_id, produto_id, quantidade, preco) VALUES
-(1, 1, 2, 29.90),  -- 2 unidades do Produto 1 no Pedido 1
-(1, 2, 1, 19.99),  -- 1 unidade do Produto 2 no Pedido 1
-(2, 2, 1, 19.99),  -- 1 unidade do Produto 2 no Pedido 2
-(3, 3, 1, 39.50);  -- 1 unidade do Produto 3 no Pedido 3
+(1, 1, 2, 29.90),
+(1, 2, 1, 19.99),
+(2, 2, 1, 19.99),
+(3, 3, 1, 39.50);
 
 INSERT INTO estoque (produto_id, quantidade) VALUES
-(1, 50),  -- Estoque do Produto 1
-(2, 30),  -- Estoque do Produto 2
-(3, 20);  -- Estoque do Produto 3
+(1, 50),
+(2, 30),
+(3, 20);
+

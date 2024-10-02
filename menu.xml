@@ -1,21 +1,27 @@
 <menu>
-    <menuitem label='Home'>
-        <icon>fa:home fa-fw</icon>
+    <menuitem label='Cadastro'>
+        <icon>fas:address-book fa-fw</icon>
         <menu>
-            <menuitem label='Início'>
-                <icon>fa:life-ring fa-fw</icon>
-                <action>WelcomeView</action>
+            <menuitem label='Cliente'>
+                <icon>fa:user fa-fw</icon>
+                <action>ClienteForm</action>
+            </menuitem>
+
+            <menuitem label='Produto'>
+                <icon>fas:cube fa-fw</icon>
+                <action>ProdutoForm</action>
             </menuitem>
             
-            <menuitem label='Aprenda'>
-                <icon>fa:book fa-fw</icon>
-                <action>LearnView</action>
+            <menuitem label='Estoque'>
+                <icon>fas:boxes fa-fw</icon>
+                <action>EstoqueForm</action>
             </menuitem>
             
-            <menuitem label='Template'>
-                <icon>fa:desktop fa-fw</icon>
-                <action>TemplateView</action>
+            <menuitem label='Pedidos'>
+                <icon>fas:clipboard-list fa-fw</icon>
+                <action>PedidoForm</action>
             </menuitem>
+            
         </menu>
     </menuitem>
     <menuitem label='Configuração'>
