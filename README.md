@@ -23,6 +23,7 @@ O sistema é baseado em cinco tabelas principais:
 
    - Armazena informações do catálogo, incluindo nome, preço e quantidade em estoque.
    - Controla o nível de estoque em tempo real, evitando excessos ou faltas de produtos.
+   - Ele esta vincula uma TAG da Tabela de **Categoria**.
 
 3. **Pedidos**:
 
@@ -58,7 +59,7 @@ O **StockTrack** foi projetado para crescer com o seu negócio. Algumas melhoria
 Clone o repositório:
 
 ```bash
-git clone https://github.com/seu-usuario/stocktrack.git
+git clone https://github.com/guigasprog/stocktrack.git
 ```
 
 Instale as dependências necessárias e configure o banco de dados conforme a estrutura de tabelas fornecida.
