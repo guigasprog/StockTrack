@@ -29,6 +29,38 @@
             
         </menu>
     </menuitem>
+
+    <menuitem label='Visualize'>
+        <icon>fas:address-book fa-fw</icon>
+        <menu>
+            <menuitem label='Cliente'>
+                <icon>fa:user fa-fw</icon>
+                <action>ClientesPage</action>
+            </menuitem>
+
+            <menuitem label='Produto'>
+                <icon>fas:cube fa-fw</icon>
+                <action>ProdutoForm</action>
+            </menuitem>
+            
+            <menuitem label='Categoria'>
+                <icon>fas:tag fa-fw</icon>
+                <action>CategoriaForm</action>
+            </menuitem>
+            
+            <menuitem label='Estoque'>
+                <icon>fas:boxes fa-fw</icon>
+                <action>EstoqueForm</action>
+            </menuitem>
+            
+            <menuitem label='Pedidos'>
+                <icon>fas:clipboard-list fa-fw</icon>
+                <action>PedidoForm</action>
+            </menuitem>
+            
+        </menu>
+    </menuitem>
+
     <menuitem label='Configuração'>
         <icon>fa:cog fa-fw</icon>
         <menu>
