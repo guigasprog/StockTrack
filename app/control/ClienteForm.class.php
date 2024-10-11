@@ -118,11 +118,7 @@ class ClienteForm extends TPage
             TTransaction::open('development');
 
             $data = $this->form->getData();
-            
-            // Validar CPF
-            if ($this->isValidCPF($data->cpf)) {
-                throw new Exception('CPF inválido');
-            }
+
             $clienteExistente = Cliente::where('email', '=', $data->email)->first();
 
             if ($clienteExistente && $clienteExistente->id != $data->id) {
@@ -167,40 +163,5 @@ class ClienteForm extends TPage
     {
         $this->form->clear();
     }
-    
-
-
-    public function isValidCPF($cpf) {
-            $cpf = preg_replace('/[^0-9]/', '', $cpf);
-            error_log($cpf);
-            // Verifica se o CPF tem 11 dígitos
-            if (strlen($cpf) != 11) {
-                return false;
-            }
-        
-            // Verifica se todos os dígitos são iguais (ex.: 111.111.111-11)
-            if (preg_match('/^(\d)\1{10}$/', $cpf)) {
-                return false;
-            }
-        
-            // Cálculo do primeiro dígito verificador
-            $soma = 0;
-            for ($i = 0; $i < 9; $i++) {
-                $soma += $cpf[$i] * (10 - $i);
-            }
-            $resto = $soma % 11;
-            $digito1 = $resto < 2 ? 0 : 11 - $resto;
-        
-            // Cálculo do segundo dígito verificador
-            $soma = 0;
-            for ($i = 0; $i < 10; $i++) {
-                $soma += $cpf[$i] * (11 - $i);
-            }
-            $resto = $soma % 11;
-            $digito2 = $resto < 2 ? 0 : 11 - $resto;
-        
-            // Verifica se os dígitos verificadores são iguais aos calculados
-            return ($cpf[9] == $digito1 && $cpf[10] == $digito2);
-        }
 
 }

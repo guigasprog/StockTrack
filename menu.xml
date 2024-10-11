@@ -1,6 +1,6 @@
 <menu>
     <menuitem label='Cadastro'>
-        <icon>fas:address-book fa-fw</icon>
+        <icon>fa:file-alt fa-fw</icon>
         <menu>
             <menuitem label='Cliente'>
                 <icon>fa:user fa-fw</icon>
@@ -31,7 +31,7 @@
     </menuitem>
 
     <menuitem label='Visualize'>
-        <icon>fas:address-book fa-fw</icon>
+        <icon>fa:list-alt fa-fw</icon>
         <menu>
             <menuitem label='Cliente'>
                 <icon>fa:user fa-fw</icon>
