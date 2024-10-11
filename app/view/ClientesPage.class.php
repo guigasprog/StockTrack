@@ -5,9 +5,11 @@ use Adianti\Widget\Datagrid\TDataGrid;
 use Adianti\Wrapper\BootstrapFormBuilder;
 use Adianti\Widget\Form\TButton;
 use Adianti\Widget\Dialog\TMessage;
+use Adianti\Widget\Dialog\TInputDialog;
 use Adianti\Database\TTransaction;
 use Adianti\Database\TRepository;
 use Adianti\Widget\Datagrid\TDataGridColumn;
+use Adianti\Widget\Datagrid\TDataGridAction;
 
 class ClientesPage extends TPage
 {
@@ -26,20 +28,26 @@ class ClientesPage extends TPage
         $this->dataGrid = new TDataGrid;
         $this->dataGrid->addColumn(new TDataGridColumn('id', 'ID', 'right', 50));
         $this->dataGrid->addColumn(new TDataGridColumn('nome', 'Nome', 'left'));
+        $this->dataGrid->addColumn(new TDataGridColumn('cpf', 'CPF', 'left'));
         $this->dataGrid->addColumn(new TDataGridColumn('email', 'Email', 'left'));
         $this->dataGrid->addColumn(new TDataGridColumn('telefone', 'Telefone', 'left'));
-        $this->dataGrid->addColumn(new TDataGridColumn('endereco', 'Endereço', 'left'));
 
         // Coluna de ações
         $action_edit = new TDataGridAction([$this, 'onEdit'], ['id' => '{id}']);
         $action_edit->setLabel('Editar');
         $action_edit->setImage('fas:edit blue');
-        
+
         $action_delete = new TDataGridAction([$this, 'onDelete'], ['id' => '{id}']);
         $action_delete->setLabel('Excluir');
         $action_delete->setImage('fas:trash-alt red');
 
+        // Adicionar ação de visualizar endereço
+        $action_view_address = new TDataGridAction([$this, 'onViewAddress'], ['id' => '{id}']);
+        $action_view_address->setLabel('Ver Endereço');
+        $action_view_address->setImage('fas:eye green');
+
         // Adicionar ações à DataGrid
+        $this->dataGrid->addAction($action_view_address);
         $this->dataGrid->addAction($action_edit);
         $this->dataGrid->addAction($action_delete);
 
@@ -67,22 +75,19 @@ class ClientesPage extends TPage
         $this->dataGrid->clear();
         // Iniciar transação com o banco de dados
         TTransaction::open('development');
-        
+
         // Carregar os clientes
         $repository = new TRepository('Cliente');
         $clientes = $repository->load();
-        
+
         // Adicionar os itens à DataGrid
         if ($clientes) {
             $this->dataGrid->addItems($clientes);
         }
-        
+
         // Fechar a transação
         TTransaction::close();
     }
-
-
-
 
     public function onAdd()
     {
@@ -91,7 +96,7 @@ class ClientesPage extends TPage
 
     public function onEdit($param)
     {
-        
+        AdiantiCoreApplication::loadPage('ClienteForm', 'onEdit', ['id' => $param['id']]);
     }
 
     public function onDelete($param)
@@ -123,6 +128,68 @@ class ClientesPage extends TPage
             new TMessage('error', $e->getMessage());
             TTransaction::rollback();
         }
+    }
+
+    public function onViewAddress($param)
+    {
+        TTransaction::open('development');
+        $cliente = new Cliente($param['id']);
+
+        if ($cliente->endereco_id) {
+            // Carregar endereço
+            $endereco = new Endereco($cliente->endereco_id);
+
+            // Criar um novo formulário para o diálogo
+            $dialogForm = new BootstrapFormBuilder('form_view_address');
+            $dialogForm->setFieldSizes('100%');
+
+            // Adicionar campos ao formulário do diálogo
+            $logradouro = new TEntry('logradouro');
+            $numero = new TEntry('numero');
+            $complemento = new TEntry('complemento');
+            $bairro = new TEntry('bairro');
+            $cidade = new TEntry('cidade');
+            $estado = new TEntry('estado');
+            $cep = new TEntry('cep');
+
+            // Definindo valores e bloqueando os campos
+            $logradouro->setValue($endereco->logradouro);
+            $numero->setValue($endereco->numero);
+            $complemento->setValue($endereco->complemento);
+            $bairro->setValue($endereco->bairro);
+            $cidade->setValue($endereco->cidade);
+            $estado->setValue($endereco->estado);
+            $cep->setValue($endereco->cep);
+
+            // Bloquear os campos para edição
+            $logradouro->setEditable(false);
+            $numero->setEditable(false);
+            $complemento->setEditable(false);
+            $bairro->setEditable(false);
+            $cidade->setEditable(false);
+            $estado->setEditable(false);
+            $cep->setEditable(false);
+
+            // Adicionar campos ao formulário com o layout desejado
+            $row = $dialogForm->addFields([new TLabel('CEP'), $cep],
+                                        [new TLabel('Logradouro'), $logradouro],
+                                        [new TLabel('Número'), $numero]);
+            $row->layout = ['col-sm-3', 'col-sm-6', 'col-sm-3'];
+
+            $row = $dialogForm->addFields([new TLabel('Cidade'), $cidade],
+                                        [new TLabel('Estado'), $estado],
+                                        [new TLabel('Bairro'), $bairro]);
+            $row->layout = ['col-sm-4', 'col-sm-4', 'col-sm-4'];
+
+            $row = $dialogForm->addFields([new TLabel('Complemento'), $complemento]);
+            $row->layout = ['col-sm-12'];
+
+            $dialog = new TInputDialog('Endereço do Cliente', $dialogForm);
+        } else {
+            new TMessage('info', 'Endereço não cadastrado para este cliente.');
+        }
+
+        TTransaction::close();
     }
 
 }

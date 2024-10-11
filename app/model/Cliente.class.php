@@ -7,21 +7,24 @@ class Cliente extends TRecord
     const PRIMARYKEY = 'id';
     const IDPOLICY = 'serial';
 
-    private $id;
-    private $nome;
-    private $email;
-    private $telefone;
     private $endereco;
-    private $created_at;
 
     public function __construct($id = NULL)
     {
         parent::__construct($id);
 
+        parent::addAttribute('endereco_id');
         parent::addAttribute('nome');
         parent::addAttribute('email');
+        parent::addAttribute('cpf');
         parent::addAttribute('telefone');
-        parent::addAttribute('endereco');
-        parent::addAttribute('created_at');
+    }
+
+    public function get_endereco()
+    {
+        if (empty($this->endereco)) {
+            $this->endereco = new Endereco($this->endereco_id);
+        }
+        return $this->endereco;
     }
 }

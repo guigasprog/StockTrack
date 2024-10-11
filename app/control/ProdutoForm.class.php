@@ -15,39 +15,41 @@ class ProdutoForm extends TPage
     private $form;
 
     public function __construct()
-    {
-        parent::__construct();
-        
-        $this->form = new BootstrapFormBuilder('form_produto');
-        $this->form->setFormTitle('Cadastro de Produto');
-        
-        $id          = new TEntry('id');
-        $nome        = new TEntry('nome');
-        $descricao   = new TEntry('descricao');
-        $preco       = new TEntry('preco');
-        $quantidade  = new TEntry('quantidade');
-        $categoria_id = new TDBCombo('categoria_id', 'development', 'Categoria', 'id', 'nome', 'nome');
+{
+    parent::__construct();
 
-        $id->setEditable(FALSE);
-        $nome->setSize('100%');
-        $descricao->setSize('100%');
-        $preco->setSize('100%');
-        $quantidade->setSize('100%');
-        $categoria_id->setSize('100%');
+    $this->form = new BootstrapFormBuilder('form_produto');
+    $this->form->setFormTitle('Cadastro de Produto');
+    $this->form->setFieldSizes('100%');
 
-        $this->form->addFields( [new TLabel('ID')],          [$id] );
-        $this->form->addFields( [new TLabel('Nome')],        [$nome] );
-        $this->form->addFields( [new TLabel('Descrição')],   [$descricao] );
-        $this->form->addFields( [new TLabel('Preço')],       [$preco] );
-        $this->form->addFields( [new TLabel('Quantidade')],   [$quantidade] );
-        $this->form->addFields( [new TLabel('Categoria')],    [$categoria_id] );
+    // Definindo os campos
+    $id         = new TEntry('id');
+    $nome       = new TEntry('nome');
+    $descricao  = new TEntry('descricao');
+    $preco      = new TEntry('preco');
+    $quantidade = new TEntry('quantidade'); // Campo para quantidade
+    $validade   = new TDate('validade'); // Campo para validade
 
-        // Save button
-        $this->form->addAction('Salvar', new TAction([$this, 'onSave']), 'fas:save');
-        $this->form->addActionLink('Limpar', new TAction([$this, 'onClear']), 'fas:eraser red');
+    $id->setEditable(FALSE);
 
-        parent::add($this->form);
-    }
+    // Adicionando os campos ao formulário
+    $row = $this->form->addFields([new TLabel('ID'), $id],
+                                   [new TLabel('Nome'), $nome],
+                                   [new TLabel('Preço'), $preco]);
+    $row->layout = ['col-sm-4', 'col-sm-4', 'col-sm-4'];
+
+    $row = $this->form->addFields([new TLabel('Descrição'), $descricao],
+                                   [new TLabel('Quantidade'), $quantidade],
+                                   [new TLabel('Validade'), $validade]);
+    $row->layout = ['col-sm-6', 'col-sm-3', 'col-sm-3'];
+
+    // Adiciona botão para limpar o formulário
+    $this->form->addActionLink('Salvar', new TAction([$this, 'onSave']), 'fa:save');
+    $this->form->addActionLink('Limpar', new TAction([$this, 'onClear']), 'fas:eraser red');
+
+    parent::add($this->form);
+}
+
     
     public function onSave()
     {
