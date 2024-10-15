@@ -189,8 +189,93 @@ class ProdutosPage extends TPage
                     ';
                 }
             
-                $imagePanel->add($imageTable); // Adiciona a tabela de imagens ao painel
-                $dialogForm->add($imagePanel); // Adiciona o painel de imagens ao formulário
+                $imagePanel->add($imageTable);
+                $dialogForm->add($imagePanel);
+            } else {
+                $noImageMessage = new TLabel('Não há imagens cadastradas para este produto.');
+                $noImageMessage->style = 'width: 100%; text-align: center;';
+                $dialogForm->add($noImageMessage);
+            }
+
+            $dialog = new TInputDialog('Detalhes do Produto', $dialogForm);
+        } else {
+            new TMessage('info', 'Categoria não cadastrado para este Produto.');
+        }
+
+        TTransaction::close();
+    }
+
+    public function onViewEstoque($param)
+    {
+        TTransaction::open('development');
+        $estoques = new Estoque($param['id']);
+
+        if ($estoques) {
+
+            $dialogForm = new BootstrapFormBuilder('form_view_address');
+            $dialogForm->setFieldSizes('100%');
+
+            $descricao = new TEntry('descricao');
+            $categoria_nome = new TEntry('categoria_nome');
+            $categoria_descricao = new TText('categoria_descricao');
+
+            $descricao->setValue($produto->descricao);
+            $categoria_nome->setValue($categoria->nome);
+            $categoria_descricao->setValue($categoria->descricao);
+
+            $categoria_nome->setEditable(false);
+            $descricao->setEditable(false);
+            $categoria_descricao->setEditable(false);
+
+            $categoria_nome->setSize(300); // Defina a largura desejada
+            $descricao->setSize(300, 200); // Defina a largura e altura desejadas
+            $categoria_descricao->setSize(300); // Defina a largura e altura desejadas
+
+            $row = $dialogForm->addFields([new TLabel('Categoria'), $categoria_nome],
+                                        [new TLabel('Detalhes da Categoria'), $categoria_descricao],
+                                        [new TLabel('Descrição'), $descricao]);
+            $row->layout = ['col-sm-4', 'col-sm-8', 'col-sm-12'];
+
+            $imagemRepository = new TRepository('ImagensProduto');
+            $criteria = new TCriteria;
+            $criteria->add(new TFilter('produto_id', '=', $produto->id));
+            $imagens = $imagemRepository->load($criteria);
+
+            if ($imagens) {
+                $imagePanel = new TPanelGroup('Imagens do Produto');
+                $imageTable = new TTable;
+                $imageTable->style = 'width: 100%;';
+                $row = $imageTable->addRow();
+                $row->style = '
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center; 
+                align-items: center
+            ';
+                foreach ($imagens as $imagem) {
+                    $div = new TElement('div');
+
+                    $div->id = 'image_'.$imagem->id;
+
+                    $div->style = '
+                        width: 100px; 
+                        height: 100px; 
+                        background-image: url("data:image/png;base64,'.$imagem->imagem.'"); 
+                        background-size: cover; 
+                        background-position: center; 
+                        background-repeat: no-repeat;
+                    ';
+            
+                    $row->addCell($div)->style = '
+                        width: 150px;
+                        display: flex; 
+                        justify-content: center; 
+                        align-items: center
+                    ';
+                }
+            
+                $imagePanel->add($imageTable);
+                $dialogForm->add($imagePanel);
             } else {
                 $noImageMessage = new TLabel('Não há imagens cadastradas para este produto.');
                 $noImageMessage->style = 'width: 100%; text-align: center;';

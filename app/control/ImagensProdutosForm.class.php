@@ -52,10 +52,8 @@ class ImagensProdutosForm extends TPage
         try {
             TTransaction::open('development');
 
-            // Coleta os dados do formulário
             $data = $this->form->getData();
 
-            // Cria um novo registro na tabela ImagensProduto
             $imagemProduto = new ImagensProduto();
             $imagemProduto->descricao = $data->descricao;
             $imagemProduto->imagem = base64_encode(file_get_contents('C:/xampp/htdocs/stocktrack/tmp/'.$data->imagem));

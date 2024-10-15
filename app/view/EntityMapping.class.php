@@ -23,10 +23,14 @@ class EntityMapping extends TPage
         $col_class  = new TDataGridColumn('class', 'Classe', 'left');
         $col_table  = new TDataGridColumn('table', 'Tabela', 'left');
         $col_fields = new TDataGridColumn('fields', 'Campos', 'left');
+        $col_relacionamento = new TDataGridColumn('relacionamento', 'Relacionamentos', 'left');
+        $col_entidade_relacionada = new TDataGridColumn('entidade_relacionada', 'Entidade Relacionada', 'left');
 
         $this->datagrid->addColumn($col_class);
         $this->datagrid->addColumn($col_table);
         $this->datagrid->addColumn($col_fields);
+        $this->datagrid->addColumn($col_relacionamento);
+        $this->datagrid->addColumn($col_entidade_relacionada);
 
         $this->datagrid->createModel();
 
