@@ -35,6 +35,7 @@ class ProdutoForm extends TPage
 
         $id->setEditable(FALSE);
         $preco->setNumericMask(2, ',', '.', true);
+        $validade->setMask('dd/mm/yyyy');
 
         // Adicionando os campos ao formulário
         $row = $this->form->addFields([new TLabel('ID'), $id],
@@ -64,6 +65,7 @@ class ProdutoForm extends TPage
             $data = $this->form->getData();
             
             $produto = new Produto();
+            $validade = new TDate('validade');
             $produto->fromArray((array) $data);
             
             // Verifica se há uma categoria selecionada

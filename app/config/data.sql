@@ -123,3 +123,10 @@ INSERT INTO estoque (produto_id, quantidade) VALUES
 (2, 30),
 (3, 20);
 
+CREATE TABLE imagens_produto (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    produto_id INT NOT NULL,
+    descricao VARCHAR(255) NOT NULL,
+    imagem BLOB NOT NULL,
+    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
+);

@@ -1,9 +1,10 @@
 <?php
+
 use Adianti\Database\TRecord;
 
-class ItemPedido extends TRecord
+class ImagensProduto extends TRecord
 {
-    const TABLENAME = 'itens_pedido';
+    const TABLENAME = 'imagens_produto ';
     const PRIMARYKEY = 'id';
     const IDPOLICY = 'serial';
 
@@ -11,9 +12,8 @@ class ItemPedido extends TRecord
     {
         parent::__construct($id);
 
-        parent::addAttribute('pedido_id');
         parent::addAttribute('produto_id');
-        parent::addAttribute('quantidade');
-        parent::addAttribute('preco');
+        parent::addAttribute('imagem');
+        parent::addAttribute('descricao');
     }
 }

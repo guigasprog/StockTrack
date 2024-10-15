@@ -2,9 +2,20 @@
     <menuitem label='Cadastro'>
         <icon>fa:file-alt fa-fw</icon>
         <menu>
+
+            <menuitem label='Estoque'>
+                <icon>fas:boxes fa-fw</icon>
+                <action>EstoqueForm</action>
+            </menuitem>
+            
             <menuitem label='Cliente'>
                 <icon>fa:user fa-fw</icon>
                 <action>ClienteForm</action>
+            </menuitem>
+
+            <menuitem label='Categoria'>
+                <icon>fas:tag fa-fw</icon>
+                <action>CategoriaForm</action>
             </menuitem>
 
             <menuitem label='Produto'>
@@ -12,14 +23,9 @@
                 <action>ProdutoForm</action>
             </menuitem>
             
-            <menuitem label='Categoria'>
-                <icon>fas:tag fa-fw</icon>
-                <action>CategoriaForm</action>
-            </menuitem>
-            
-            <menuitem label='Estoque'>
-                <icon>fas:boxes fa-fw</icon>
-                <action>EstoqueForm</action>
+            <menuitem label='Imagem do Produto'>
+                <icon>fa:image fa-fw</icon>
+                <action>ImagensProdutosForm</action>
             </menuitem>
             
             <menuitem label='Pedidos'>
@@ -40,7 +46,7 @@
 
             <menuitem label='Produto'>
                 <icon>fas:cube fa-fw</icon>
-                <action>ProdutoForm</action>
+                <action>ProdutosPage</action>
             </menuitem>
             
             <menuitem label='Categoria'>
@@ -72,6 +78,15 @@
             <menuitem label='Setup PHP'>
                 <icon>fa:code fa-fw</icon>
                 <action>SystemPHPInfoView</action>
+            </menuitem>
+        </menu>
+    </menuitem>
+    <menuitem label="Mapeamento de Entidades">
+        <icon>fa:map fa-fw</icon>
+        <menu>
+            <menuitem label="Visualizar Mapeamento">
+                <icon>fa:table fa-fw</icon>
+                <action>EntityMapping</action>
             </menuitem>
         </menu>
     </menuitem>

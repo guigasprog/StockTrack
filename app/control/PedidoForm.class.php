@@ -13,6 +13,7 @@ use Adianti\Control\TAction;
 class PedidoForm extends TPage
 {
     private $form;
+    private $produto_id; // Definir como propriedade da classe
 
     public function __construct()
     {
@@ -22,19 +23,19 @@ class PedidoForm extends TPage
         $this->form->setFormTitle('Cadastro de Pedido');
 
         // Criação dos campos do formulário
-        $id          = new TEntry('id');
-        $cliente_id  = new TDBCombo('cliente_id', 'development', 'Cliente', 'id', 'nome', 'nome');
-        $produto_id  = new TDBCombo('produto_id', 'development', 'Produto', 'id', 'nome', 'nome');
-        $quantidade  = new TEntry('quantidade');
+        $id         = new TEntry('id');
+        $cliente_id = new TDBCombo('cliente_id', 'development', 'Cliente', 'id', 'nome', 'nome');
+        $this->produto_id = new TDBCombo('produto_id', 'development', 'Produto', 'id', 'nome', 'nome'); // Definir a variável produto_id
+        $quantidade = new TEntry('quantidade');
         
         $id->setEditable(FALSE);
         $quantidade->setSize('100%');
-        $quantidade->setValue(1); // Definir um valor padrão para a quantidade
+        $quantidade->setValue(1);
 
         // Adicionando os campos ao formulário
         $this->form->addFields( [new TLabel('ID')], [$id] );
         $this->form->addFields( [new TLabel('Cliente')], [$cliente_id] );
-        $this->form->addFields( [new TLabel('Produto')], [$produto_id] );
+        $this->form->addFields( [new TLabel('Produto')], [$this->produto_id] ); // Adicionando a instância correta
         $this->form->addFields( [new TLabel('Quantidade')], [$quantidade] );
 
         // Botão de ação para salvar o pedido
@@ -47,7 +48,7 @@ class PedidoForm extends TPage
         $this->form->addAction('Salvar', new TAction([$this, 'onSave']), 'fas:save');
         
         parent::add($this->form);
-        
+
         // Carregar os produtos disponíveis
         $this->loadAvailableProducts();
     }
@@ -56,24 +57,36 @@ class PedidoForm extends TPage
     public function loadAvailableProducts()
     {
         try {
-            TTransaction::open('development');
+            TTransaction::open('development'); // Abrir a transação
 
-            $repository = new TRepository('Produto');
+            $repository = new TRepository('Estoque');
             $criteria = new TCriteria();
             $criteria->add(new TFilter('quantidade', '>', 0)); // Filtrar produtos com quantidade maior que 0
 
-            $produtos = $repository->load($criteria);
+            $estoques = $repository->load($criteria);
 
-            TTransaction::close();
+            // Atualizar o TDBCombo de produtos com base nos estoques disponíveis
+            if ($estoques) {
+                $produtos_disponiveis = [];
+                foreach ($estoques as $estoque) {
+                    $produto = new Produto($estoque->produto_id); // Carregar produto dentro da transação
+                    $produtos_disponiveis[$produto->id] = $produto->nome;
+                }
 
-            // Você pode querer manipular os produtos aqui se necessário
-            // Como adicionar as opções no dropdown, isso será tratado automaticamente pelo TDBCombo
+                // Verificar se o campo produto_id está corretamente instanciado antes de usar addItems
+                if ($this->produto_id) {
+                    $this->produto_id->addItems($produtos_disponiveis);
+                }
+            }
 
+            TTransaction::close(); // Fechar a transação
         } catch (Exception $e) {
             new TMessage('error', $e->getMessage());
-            TTransaction::rollback();
+            TTransaction::rollback(); // Fazer rollback em caso de erro
         }
     }
+
+
 
     // Método para salvar o pedido e os itens
     public function onSave()
@@ -91,19 +104,18 @@ class PedidoForm extends TPage
             $pedido->store(); // Salvar o pedido
 
             // Criar um item de pedido
-            $itemPedido = new ItemPedido();
-            $itemPedido->pedido_id = $pedido->id;
-            $itemPedido->produto_id = $data->produto_id;
-            $itemPedido->quantidade = $data->quantidade;
+            $pedidoProduto = new PedidoProduto();
+            $pedidoProduto->pedido_id = $pedido->id;
+            $pedidoProduto->produto_id = $data->produto_id;
+            $pedidoProduto->quantidade = $data->quantidade;
 
             // Calcular o preço do item
             $produto = new Produto($data->produto_id);
-            $itemPedido->preco = $produto->preco * $data->quantidade;
 
-            $itemPedido->store(); // Salvar o item de pedido
+            $pedidoProduto->store(); // Salvar o item de pedido
             
             // Atualizar o total do pedido
-            $pedido->total += $itemPedido->preco;
+            $pedido->total += $produto->preco * $data->quantidade;
             $pedido->store();
 
             TTransaction::close();
