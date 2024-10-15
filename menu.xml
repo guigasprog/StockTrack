@@ -51,7 +51,7 @@
             
             <menuitem label='Categoria'>
                 <icon>fas:tag fa-fw</icon>
-                <action>CategoriaForm</action>
+                <action>CategoriasPage</action>
             </menuitem>
             
             <menuitem label='Estoque'>
@@ -83,11 +83,6 @@
     </menuitem>
     <menuitem label="Mapeamento de Entidades">
         <icon>fa:map fa-fw</icon>
-        <menu>
-            <menuitem label="Visualizar Mapeamento">
-                <icon>fa:table fa-fw</icon>
-                <action>EntityMapping</action>
-            </menuitem>
-        </menu>
+        <action>EntityMapping</action>
     </menuitem>
 </menu>

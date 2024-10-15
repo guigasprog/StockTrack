@@ -55,7 +55,7 @@ CREATE TABLE pedidos (
     data_pedido TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     total DECIMAL(10, 2) NOT NULL,
     status ENUM('pendente', 'concluído', 'cancelado') DEFAULT 'pendente',
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE
 );
 
 -- TABELA DE ITENS DO PEDIDO (MANY-TO-MANY ENTRE PEDIDOS E PRODUTOS)
@@ -65,7 +65,7 @@ CREATE TABLE pedido_produto (
     quantidade INT NOT NULL,
     PRIMARY KEY (pedido_id, produto_id),
     FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
-    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
+    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE
 );
 
 -- CRIA TABELA DE ESTOQUE USANDO produto_id COMO PRIMARY KEY
@@ -73,7 +73,7 @@ CREATE TABLE estoque (
     produto_id INT PRIMARY KEY,
     quantidade INT NOT NULL,
     data_entrada TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
+    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE
 );
 
 -- INSERINDO DADOS

@@ -20,7 +20,7 @@ class CategoriaForm extends TPage
         $this->form = new BootstrapFormBuilder('form_categoria');
         $this->form->setFormTitle('Cadastro de Categoria');
         
-        $id   = new TEntry('id');
+        $id   = new TEntry('idCategoria');
         $nome = new TEntry('nome');
         $descricao = new TEntry('descricao');
 
