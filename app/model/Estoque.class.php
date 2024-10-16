@@ -4,12 +4,13 @@ use Adianti\Database\TRecord;
 class Estoque extends TRecord
 {
     const TABLENAME = 'estoque';
-    const PRIMARYKEY = 'produto_id'; // A chave primária será o produto_id
+    const PRIMARYKEY = 'id'; // A chave primária será o produto_id
     const IDPOLICY = 'serial'; // Ou manual, depende de como está o seu controle
 
-    public function __construct($produto_id = NULL)
+    public function __construct($id = NULL)
     {
-        parent::__construct($produto_id);
+        parent::__construct($id);
+        parent::addAttribute('produto_id');
         parent::addAttribute('quantidade');
         parent::addAttribute('data_entrada');
     }

@@ -55,7 +55,7 @@ CREATE TABLE pedidos (
     data_pedido TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     total DECIMAL(10, 2) NOT NULL,
     status ENUM('pendente', 'concluído', 'cancelado') DEFAULT 'pendente',
-    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id)
 );
 
 -- TABELA DE ITENS DO PEDIDO (MANY-TO-MANY ENTRE PEDIDOS E PRODUTOS)
@@ -65,63 +65,17 @@ CREATE TABLE pedido_produto (
     quantidade INT NOT NULL,
     PRIMARY KEY (pedido_id, produto_id),
     FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
-    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE
+    FOREIGN KEY (produto_id) REFERENCES produtos(id)
 );
 
 -- CRIA TABELA DE ESTOQUE USANDO produto_id COMO PRIMARY KEY
 CREATE TABLE estoque (
-    produto_id INT PRIMARY KEY,
+    id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    produto_id INT,
     quantidade INT NOT NULL,
     data_entrada TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE
+    FOREIGN KEY (produto_id) REFERENCES produtos(id)
 );
-
--- INSERINDO DADOS
-
--- INSERINDO DADOS NAS TABELAS
-
--- Endereços
-INSERT INTO enderecos (logradouro, numero, complemento, bairro, cidade, estado, cep) VALUES
-('Rua A', '123', 'Apto 101', 'Centro', 'São Paulo', 'SP', '01234-567'),
-('Avenida B', '456', NULL, 'Jardim', 'Rio de Janeiro', 'RJ', '02345-678'),
-('Travessa C', '789', 'Casa', 'Bairro Velho', 'Belo Horizonte', 'MG', '03456-789');
-
--- Categorias
-INSERT INTO categorias (nome, descricao) VALUES
-('Categoria A', 'Descrição da Categoria A'),
-('Categoria B', 'Descrição da Categoria B'),
-('Categoria C', 'Descrição da Categoria C');
-
--- Clientes
-INSERT INTO clientes (nome, email, telefone, cpf, endereco_id) VALUES
-('Maria Silva', 'maria.silva@example.com', '9999-9999', '12345678901', 1),
-('João Pereira', 'joao.pereira@example.com', '9888-8888', '10987654321', 2),
-('Ana Costa', 'ana.costa@example.com', '9777-7777', '10203040506', 3);
-
--- Produtos (removido o campo quantidade)
-INSERT INTO produtos (nome, descricao, preco, validade, categoria_id) VALUES
-('Produto 1', 'Descrição do Produto 1', 29.90, '2025-12-31', 1),
-('Produto 2', 'Descrição do Produto 2', 19.99, '2023-11-30', 2),
-('Produto 3', 'Descrição do Produto 3', 39.50, '2024-10-01', 3);
-
--- Pedidos
-INSERT INTO pedidos (cliente_id, total, status) VALUES
-(1, 59.80, 'concluído'),
-(2, 19.99, 'pendente'),
-(1, 39.50, 'cancelado');
-
--- Itens de Pedido
-INSERT INTO pedido_produto (pedido_id, produto_id, quantidade) VALUES
-(1, 1, 2),
-(1, 2, 1),
-(2, 2, 1),
-(3, 3, 1);
-
--- Estoque (adicionando quantidade e preço por unidade)
-INSERT INTO estoque (produto_id, quantidade) VALUES
-(1, 50),
-(2, 30),
-(3, 20);
 
 CREATE TABLE imagens_produto (
     id INT AUTO_INCREMENT PRIMARY KEY,

@@ -42,14 +42,12 @@ class EstoqueForm extends TPage
             
             $data = $this->form->getData();
             
-            // Verifica se já existe o produto no estoque
             $estoque = Estoque::where('produto_id', '=', $data->produto_id)->first();
-            if (!$estoque) {
-                $estoque = new Estoque();
-            }
+            $estoque = new Estoque();
 
             $estoque->produto_id = $data->produto_id;
             $estoque->quantidade = $data->quantidade;
+            $estoque->data_hora = date("Y-m-d");
             $estoque->store();
 
             TTransaction::close();
