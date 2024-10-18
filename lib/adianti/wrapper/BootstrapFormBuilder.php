@@ -774,135 +774,138 @@ class BootstrapFormBuilder implements AdiantiFormInterface
         $body->add($content);
         
         $tab_counter = 0;
-        foreach ($this->tabcontent as $tab => $rows)
-        {
-            $tabpanel = new TElement('div');
-            $tabpanel->{'role'}  = 'tabpanel';
-            $tabpanel->{'class'} = 'tab-pane tabpanel_'.$this->name .' '. ( ($tab_counter == $this->current_page) ? 'active' : '' );
-            $tabpanel->{'style'} = 'padding:10px; margin-top: -1px;';
-            if ($tab)
+        if($this->tabcontent) {
+            foreach ($this->tabcontent as $tab => $rows)
             {
-                $tabpanel->{'style'} .= 'border: 1px solid #DDDDDD';
-            }
-            $tabpanel->{'id'}    = "tab_{$this->id}_{$tab_counter}";
-            
-            $content->add($tabpanel);
-            
-            if ($rows)
-            {
-                foreach ($rows as $row)
+                $tabpanel = new TElement('div');
+                $tabpanel->{'role'}  = 'tabpanel';
+                $tabpanel->{'class'} = 'tab-pane tabpanel_'.$this->name .' '. ( ($tab_counter == $this->current_page) ? 'active' : '' );
+                $tabpanel->{'style'} = 'padding:10px; margin-top: -1px;';
+                if ($tab)
                 {
-                    $aria_label  = null;
-                    $aria_id     = null;
-                    
-                    $slots = $row->{'content'};
-                    $type  = $row->{'type'};
-                    
-                    $form_group = new TElement('div');
-                    $form_group->{'class'} = 'form-group tformrow row' . ' ' . ( isset($row->{'class'}) ? $row->{'class'} : '' );
-                    $tabpanel->add($form_group);
-                    $row_visual_widgets = 0;
-                    
-                    if (isset($row->{'style'}))
+                    $tabpanel->{'style'} .= 'border: 1px solid #DDDDDD';
+                }
+                $tabpanel->{'id'}    = "tab_{$this->id}_{$tab_counter}";
+                
+                $content->add($tabpanel);
+                
+                if ($rows)
+                {
+                    foreach ($rows as $row)
                     {
-                        $form_group->{'style'} = $row->{'style'};
-                    }
-                    
-                    $slot_counter = count($slots);
-                    $row_counter  = 0;
-                    
-                    foreach ($slots as $slot)
-                    {
-                        $label_css    = ((count($slots)>1) AND (count($slot)==1) AND $slot[0] instanceof TLabel AND empty($row->layout)) ? ' col-form-label control-label' : '';
-                        $column_class = (!empty($row->layout) ? $row->layout[$row_counter] : $this->column_classes[$slot_counter][$row_counter]);
-                        $slot_wrapper = new TElement('div');
-                        $slot_wrapper->{'class'} = $column_class . ' fb-field-container '.$label_css;
-                        $slot_wrapper->{'style'} = 'min-height:26px';
-                        $form_group->add($slot_wrapper);
+                        $aria_label  = null;
+                        $aria_id     = null;
                         
-                        // one field per slot do not need to be wrapped
-                        if (count($slot)==1)
+                        $slots = $row->{'content'};
+                        $type  = $row->{'type'};
+                        
+                        $form_group = new TElement('div');
+                        $form_group->{'class'} = 'form-group tformrow row' . ' ' . ( isset($row->{'class'}) ? $row->{'class'} : '' );
+                        $tabpanel->add($form_group);
+                        $row_visual_widgets = 0;
+                        
+                        if (isset($row->{'style'}))
                         {
-                            foreach ($slot as $field)
-                            {
-                                $field_wrapper = self::wrapField($field, 'inherit', $this->field_sizes);
-                                
-                                $slot_wrapper->add($field_wrapper);
-                                
-                                if (!$field instanceof THidden)
-                                {
-                                    $row_visual_widgets ++;
-                                }
-                                
-                                if ($field instanceof TLabel)
-                                {
-                                    $aria_label = $field->getValue();
-                                    $aria_id    = $field->getId();
-                                }
-                                
-                                if ($this->automatic_aria && !empty($aria_label) && !$field instanceof TLabel && $field instanceof TField)
-                                {
-                                    $field->{'aria-label'} = $aria_label;
-                                    $field->{'aria-labelledby'} = $aria_id;
-                                }
-                                
-                                if ($field instanceof TField && $field->isRequired())
-                                {
-                                    $field->{'aria-required'} = 'true';
-                                }
-                            }
-                        }
-                        else // more fields must be wrapped
-                        {
-                            $field_counter = 0;
-                            foreach ($slot as $field)
-                            {
-                                $field_wrapper = self::wrapField($field, 'inline-block', $this->field_sizes);
-                                
-                                if ( ($field_counter+1 < count($slot)) and (!$field instanceof TDBSeekButton) ) // padding less last element
-                                {
-                                    $field_wrapper->{'style'} .= ';padding-right: '.$this->padding.'px;';
-                                }
-                                
-                                $slot_wrapper->add($field_wrapper);
-                                
-                                if (!$field instanceof THidden)
-                                {
-                                    $row_visual_widgets ++;
-                                }
-                                
-                                if ($field instanceof TLabel)
-                                {
-                                    $aria_label = $field->getValue();
-                                    $aria_id    = $field->getId();
-                                }
-                                
-                                if ($this->automatic_aria && !empty($aria_label) && !$field instanceof TLabel && $field instanceof TField)
-                                {
-                                    $field->{'aria-label'} = $aria_label;
-                                    $field->{'aria-labelledby'} = $aria_id;
-                                }
-                                
-                                if ($field instanceof TField && $field->isRequired())
-                                {
-                                    $field->{'aria-required'} = 'true';
-                                }
-                                
-                                $field_counter ++;
-                            }
+                            $form_group->{'style'} = $row->{'style'};
                         }
                         
-                        $row_counter ++;
-                    }
-                    
-                    if ($row_visual_widgets == 0)
-                    {
-                        $form_group->{'style'} = 'display:none';
+                        $slot_counter = count($slots);
+                        $row_counter  = 0;
+                        
+                        foreach ($slots as $slot)
+                        {
+                            $label_css    = ((count($slots)>1) AND (count($slot)==1) AND $slot[0] instanceof TLabel AND empty($row->layout)) ? ' col-form-label control-label' : '';
+                            $column_class = (!empty($row->layout) ? $row->layout[$row_counter] : $this->column_classes[$slot_counter][$row_counter]);
+                            $slot_wrapper = new TElement('div');
+                            $slot_wrapper->{'class'} = $column_class . ' fb-field-container '.$label_css;
+                            $slot_wrapper->{'style'} = 'min-height:26px';
+                            $form_group->add($slot_wrapper);
+                            
+                            // one field per slot do not need to be wrapped
+                            if (count($slot)==1)
+                            {
+                                foreach ($slot as $field)
+                                {
+                                    $field_wrapper = self::wrapField($field, 'inherit', $this->field_sizes);
+                                    
+                                    $slot_wrapper->add($field_wrapper);
+                                    
+                                    if (!$field instanceof THidden)
+                                    {
+                                        $row_visual_widgets ++;
+                                    }
+                                    
+                                    if ($field instanceof TLabel)
+                                    {
+                                        $aria_label = $field->getValue();
+                                        $aria_id    = $field->getId();
+                                    }
+                                    
+                                    if ($this->automatic_aria && !empty($aria_label) && !$field instanceof TLabel && $field instanceof TField)
+                                    {
+                                        $field->{'aria-label'} = $aria_label;
+                                        $field->{'aria-labelledby'} = $aria_id;
+                                    }
+                                    
+                                    if ($field instanceof TField && $field->isRequired())
+                                    {
+                                        $field->{'aria-required'} = 'true';
+                                    }
+                                }
+                            }
+                            else // more fields must be wrapped
+                            {
+                                $field_counter = 0;
+                                foreach ($slot as $field)
+                                {
+                                    $field_wrapper = self::wrapField($field, 'inline-block', $this->field_sizes);
+                                    
+                                    if ( ($field_counter+1 < count($slot)) and (!$field instanceof TDBSeekButton) ) // padding less last element
+                                    {
+                                        $field_wrapper->{'style'} .= ';padding-right: '.$this->padding.'px;';
+                                    }
+                                    
+                                    $slot_wrapper->add($field_wrapper);
+                                    
+                                    if (!$field instanceof THidden)
+                                    {
+                                        $row_visual_widgets ++;
+                                    }
+                                    
+                                    if ($field instanceof TLabel)
+                                    {
+                                        $aria_label = $field->getValue();
+                                        $aria_id    = $field->getId();
+                                    }
+                                    
+                                    if ($this->automatic_aria && !empty($aria_label) && !$field instanceof TLabel && $field instanceof TField)
+                                    {
+                                        $field->{'aria-label'} = $aria_label;
+                                        $field->{'aria-labelledby'} = $aria_id;
+                                    }
+                                    
+                                    if ($field instanceof TField && $field->isRequired())
+                                    {
+                                        $field->{'aria-required'} = 'true';
+                                    }
+                                    
+                                    $field_counter ++;
+                                }
+                            }
+                            
+                            $row_counter ++;
+                        }
+                        
+                        if ($row_visual_widgets == 0)
+                        {
+                            $form_group->{'style'} = 'display:none';
+                        }
                     }
                 }
+                $tab_counter ++;
             }
-            $tab_counter ++;
         }
+        
         
         if ($this->actions)
         {

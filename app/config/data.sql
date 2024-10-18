@@ -81,6 +81,6 @@ CREATE TABLE imagens_produto (
     id INT AUTO_INCREMENT PRIMARY KEY,
     produto_id INT NOT NULL,
     descricao VARCHAR(255) NOT NULL,
-    imagem BLOB NOT NULL,
+    imagem LONGBLOB NOT NULL,
     FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
 );

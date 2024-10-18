@@ -56,7 +56,7 @@
             
             <menuitem label='Estoque'>
                 <icon>fas:boxes fa-fw</icon>
-                <action>EstoqueForm</action>
+                <action>EstoquePage</action>
             </menuitem>
             
             <menuitem label='Pedidos'>

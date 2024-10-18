@@ -213,32 +213,42 @@ class ProdutosPage extends TPage
 
     public function onViewEstoque($param)
     {
-        TTransaction::open('development');
-        $estoques = new Estoque($param['id']);
-
-        if ($estoques) {
-
-            $dialogForm = new BootstrapFormBuilder('form_view_address');
+        try {
+            TTransaction::open('development');
+                
+            $dialogForm = new BootstrapFormBuilder('form_view_estoque');
             $dialogForm->setFieldSizes('100%');
+            $estoqueRepository = new TRepository('Estoque');
+            $criteria = new TCriteria;
+            $criteria->add(new TFilter('produto_id', '=', $param['id']));
+            $estoques = $estoqueRepository->load($criteria);
 
-            $estoqueTable = new TTable;
-            $estoqueTable->style = 'width: 100%;';
-            $row = $estoqueTable->addRow();
-            foreach ($estoques as $estoque) {
-                $row->addCell($estoque->quantidade);
-                $row->addCell($estoque->data_entrada);
+            if ($estoques) {
+                    
+                $estoqueTable = new TTable;
+                $estoqueTable->style = 'width: 100%; text-align: center';
+                $estoqueTable->addRowSet('Quantidade', 'Data de Entrada');
+
+                foreach ($estoques as $estoque) {
+                    $quantidade = $estoque->quantidade ?? 'N/A';
+                    $data_entrada = $estoque->data_entrada ?? 'N/A';
+                    $estoqueTable->addRowSet($quantidade, $data_entrada);
+                }
+                    
+                // Adicionar a tabela ao formulário do diálogo
+                $dialogForm->add($estoqueTable);
+
+                // Criar o diálogo
+                $dialog = new TInputDialog('Estoque do Produto', $dialogForm);
+            } else {
+                new TMessage('info', 'Nenhum estoque encontrado para este produto.');
             }
-            
-            $dialogForm->add($estoqueTable);
-         } else {
-            $noEstoqueMessage = new TLabel('Não há este produto em estoque.');
-            $noEstoqueMessage->style = 'width: 100%; text-align: center;';
-            $dialogForm->add($noEstoqueMessage);
+
+            TTransaction::close();
         }
-
-        $dialog = new TInputDialog('Estoque do Produto', $dialogForm);
-
-        TTransaction::close();
+        catch (Exception $e) {
+            new TMessage('error', $e->getMessage());
+            TTransaction::rollback();
+        }
     }
-
 }
