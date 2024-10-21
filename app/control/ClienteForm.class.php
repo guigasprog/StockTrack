@@ -9,6 +9,7 @@ use Adianti\Wrapper\BootstrapFormBuilder;
 use Adianti\Widget\Wrapper\TDBCombo;
 use Adianti\Database\TTransaction;
 use Adianti\Control\TAction;
+use App\Service\ConsultaCepService;
 
 class ClienteForm extends TPage
 {
@@ -64,12 +65,7 @@ class ClienteForm extends TPage
         $row->layout = ['col-sm-4', 'col-sm-4', 'col-sm-4'];
         $row = $this->form->addFields([new TLabel('Complemento'), $complemento]);
         $row->layout = ['col-sm-12'];
-    
-        $btn_save = new TButton('save');
-        $btn_save->setLabel('Salvar');
-        $btn_save->setImage('fas:save');
-        $btn_save->setAction(new TAction([$this, 'onSave']), 'Salvar');
-
+        $this->form->addAction('Buscar Endereco Via CEP', new TAction([$this, 'onBuscarCep'], ['cep' => $cep]), '');
         $this->form->addAction('Salvar', new TAction([$this, 'onSave']), 'fas:save');
         $this->form->addActionLink('Limpar', new TAction([$this, 'onClear']), 'fas:eraser red');
         
@@ -162,6 +158,39 @@ class ClienteForm extends TPage
     public function onClear()
     {
         $this->form->clear();
+    }
+
+    public static function onBuscarCep($param) 
+    {
+        try 
+        {
+            // Verifica se o CEP foi informado
+            if (!isset($param['cep']) || empty($param['cep'])) {
+                throw new Exception('Por favor, informe o CEP.');
+            }
+            
+            $endereco = ConsultaCepService::getCep($param['cep'], 'json');
+            
+            if (isset($endereco->erro)) {
+                throw new Exception('CEP não encontrado.');
+            }
+
+            // Cria um objeto Endereco para enviar ao formulário
+            $object = new stdClass();
+            $object->logradouro  = $endereco->logradouro;
+            $object->bairro      = $endereco->bairro;
+            $object->cidade      = $endereco->localidade;
+            $object->estado      = $endereco->uf;
+            $object->complemento = $endereco->complemento;
+            
+            // Envia os dados para o formulário
+            TForm::sendData('form_cliente', $object);
+
+        } 
+        catch (Exception $e) 
+        {
+            new TMessage('error', $e->getMessage());
+        }
     }
 
 }

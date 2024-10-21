@@ -4,8 +4,8 @@ use Adianti\Database\TRecord;
 class PedidoProduto extends TRecord
 {
     const TABLENAME = 'pedido_produto';
-    const PRIMARYKEY = 'id';
-    const IDPOLICY = 'serial';
+    const PRIMARYKEY = 'pedido_id';
+    const IDPOLICY = 'manual';
 
     public function __construct($id = NULL)
     {
@@ -14,6 +14,5 @@ class PedidoProduto extends TRecord
         parent::addAttribute('pedido_id');
         parent::addAttribute('produto_id');
         parent::addAttribute('quantidade');
-        parent::addAttribute('preco');
     }
 }

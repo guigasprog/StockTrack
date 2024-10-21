@@ -27,9 +27,8 @@ class ProdutosPage extends TPage
         $this->dataGrid = new TDataGrid;
         $this->dataGrid->addColumn(new TDataGridColumn('id', 'ID', 'right', 50));
         $this->dataGrid->addColumn(new TDataGridColumn('nome', 'Nome', 'left'));
-        $this->dataGrid->addColumn(new TDataGridColumn('validade', 'Validade', 'left', 100));
         $this->dataGrid->addColumn(new TDataGridColumn('preco', 'Preço', 'left'));
-        $this->dataGrid->addColumn(new TDataGridColumn('quantidade', 'Qtde', 'right'));
+        $this->dataGrid->addColumn(new TDataGridColumn('quantidade', 'Quantidade em Estoque', 'center'));
 
         $action_edit = new TDataGridAction([$this, 'onEdit'], ['id' => '{id}']);
         $action_edit->setLabel('Editar');
@@ -75,6 +74,18 @@ class ProdutosPage extends TPage
 
         $repository = new TRepository('Produto');
         $produtos = $repository->load();
+
+        foreach($produtos as $produto) {
+            $estoqueRepository = new TRepository('Estoque');
+            $criteria = new TCriteria;
+            $criteria->add(new TFilter('produto_id', '=', $produto->id));
+            $estoques = $estoqueRepository->load($criteria);
+            $qtde = 0;
+            foreach($estoques as $estoque) {
+                $qtde += $estoque->quantidade;
+            }
+            $produto->quantidade = $qtde;
+        }
 
         // Adicionar os itens à DataGrid
         if ($produtos) {

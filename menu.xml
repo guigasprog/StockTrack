@@ -61,7 +61,7 @@
             
             <menuitem label='Pedidos'>
                 <icon>fas:clipboard-list fa-fw</icon>
-                <action>PedidoForm</action>
+                <action>PedidosPage</action>
             </menuitem>
             
         </menu>
