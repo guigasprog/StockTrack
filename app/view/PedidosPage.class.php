@@ -24,10 +24,10 @@ class PedidosPage extends TPage
         $this->form->setFormTitle('Pedidos');
 
         $this->dataGrid = new TDataGrid;
-        $this->dataGrid->addColumn(new TDataGridColumn('id', 'ID', 'right', 50));
-        $this->dataGrid->addColumn(new TDataGridColumn('nome_cliente', 'Nome do Cliente', 'left'));
-        $this->dataGrid->addColumn(new TDataGridColumn('total', 'Preço', 'left'));
-        $this->dataGrid->addColumn(new TDataGridColumn('status', 'Status', 'center'));
+        $this->dataGrid->addColumn(new TDataGridColumn('id', 'ID', 'left', '5%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('nome_cliente', 'Nome do Cliente', 'left', '45%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('total', 'Preço', 'left', '20%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('status', 'Status', 'left', '30%'));
 
         $action_view_address = new TDataGridAction([$this, 'onViewEndereco'], ['id' => '{id}']);
         $action_view_address->setLabel('Ver Endereço');

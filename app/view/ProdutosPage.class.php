@@ -25,10 +25,10 @@ class ProdutosPage extends TPage
         $this->form->setFormTitle('Produtos');
 
         $this->dataGrid = new TDataGrid;
-        $this->dataGrid->addColumn(new TDataGridColumn('id', 'ID', 'right', 50));
-        $this->dataGrid->addColumn(new TDataGridColumn('nome', 'Nome', 'left'));
-        $this->dataGrid->addColumn(new TDataGridColumn('preco', 'Preço', 'left'));
-        $this->dataGrid->addColumn(new TDataGridColumn('quantidade', 'Quantidade em Estoque', 'center'));
+        $this->dataGrid->addColumn(new TDataGridColumn('id', 'ID', 'left', '5%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('nome', 'Nome', 'left', '45%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('preco', 'Preço', 'left', '25%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('quantidade', 'Quantidade em Estoque', 'left', '25%'));
 
         $action_edit = new TDataGridAction([$this, 'onEdit'], ['id' => '{id}']);
         $action_edit->setLabel('Editar');

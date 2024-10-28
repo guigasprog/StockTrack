@@ -18,8 +18,6 @@ class PedidoForm extends TPage
 {
     private $form;
     private $produto_id;
-    private $produtos = [];
-    private $estoqueTable;
 
     public function __construct()
     {
@@ -28,12 +26,21 @@ class PedidoForm extends TPage
         $this->form = new BootstrapFormBuilder('form_pedido');
         $this->form->setFormTitle('Cadastro de Pedido');
 
-        // Criação dos campos do formulário
+        $this->initializeFormFields();
+        $this->addFormActions();
+
+        parent::add($this->form);
+
+        $this->loadAvailableProducts();
+    }
+
+    private function initializeFormFields()
+    {
         $id         = new TEntry('id');
         $cliente_id = new TDBCombo('cliente_id', 'development', 'Cliente', 'id', 'nome', 'nome');
         $this->produto_id = new TDBCombo('produto_id', 'development', 'Produto', 'id', 'nome', 'nome');
         $quantidade = new TEntry('quantidade');
-        
+
         $id->setEditable(FALSE);
         $quantidade->setSize('100%');
         $quantidade->setValue(1);
@@ -42,84 +49,50 @@ class PedidoForm extends TPage
         $this->form->addFields([new TLabel('Cliente')], [$cliente_id]);
         $this->form->addFields([new TLabel('Produto')], [$this->produto_id]);
         $this->form->addFields([new TLabel('Quantidade')], [$quantidade]);
+    }
 
-        $this->estoqueTable = new TTable;
-        $this->estoqueTable->style = 'width: 100%; text-align: center';
-        $this->estoqueTable->addRowSet('Nome do Produto', 'Quantidade');
-        $this->updateProductTable();
+    private function addFormActions()
+    {
+        $btn_save = new TButton('save');
+        $btn_save->setLabel('Salvar Pedido');
+        $btn_save->setImage('fas:save');
+        $btn_save->setAction(new TAction([$this, 'onSave']), 'Salvar');
 
-        $this->form->addAction('Adicionar Produto à Lista', new TAction([$this, 'addProdutos']), 'fas:plus');
-        $this->form->addAction('Salvar Pedido', new TAction([$this, 'onSave']), 'fas:save');
-        
-        parent::add($this->form);
-
-        $this->loadAvailableProducts();
+        $this->form->addAction('Salvar', new TAction([$this, 'onSave']), 'fas:save');
     }
 
     public function loadAvailableProducts()
     {
         try {
             TTransaction::open('development');
+            $produtos_disponiveis = $this->getAvailableProducts();
+            TTransaction::close();
 
-            $repository = new TRepository('Estoque');
-            $criteria = new TCriteria();
-            $criteria->add(new TFilter('quantidade', '>', 0));
-
-            $estoques = $repository->load($criteria);
-
-            if ($estoques) {
-                $produtos_disponiveis = [];
-                foreach ($estoques as $estoque) {
-                    $produto = new Produto($estoque->produto_id);
-                    $produtos_disponiveis[$produto->id] = $produto->nome;
-                }
-
-                if ($this->produto_id) {
-                    $this->produto_id->addItems($produtos_disponiveis);
-                }
+            if ($this->produto_id && $produtos_disponiveis) {
+                $this->produto_id->addItems($produtos_disponiveis);
             }
-
-            TTransaction::close();
         } catch (Exception $e) {
             new TMessage('error', $e->getMessage());
             TTransaction::rollback();
         }
     }
 
-    public function addProdutos($param)
+    private function getAvailableProducts()
     {
-        try {
-            TTransaction::open('development');
-            
-            $data = $this->form->getData();
-            $produto = new Produto($data->produto_id);
-            $quantidade = $data->quantidade;
-            
-            $item = new stdClass;
-            $item->id = $produto->id;
-            $item->nome = $produto->nome;
-            $item->quantidade = $quantidade;
+        $repository = new TRepository('Estoque');
+        $criteria = new TCriteria();
+        $criteria->add(new TFilter('quantidade', '>', 0));
 
-            $this->produtos[] = $item;
+        $produtos_disponiveis = [];
+        $estoques = $repository->load($criteria);
 
-            TTransaction::close();
-            
-            $this->updateProductTable();
-
-            new TMessage('info', 'Produto adicionado à lista');
-        } catch (Exception $e) {
-            new TMessage('error', $e->getMessage());
-            TTransaction::rollback();
+        if ($estoques) {
+            foreach ($estoques as $estoque) {
+                $produto = new Produto($estoque->produto_id);
+                $produtos_disponiveis[$produto->id] = $produto->nome;
+            }
         }
-    }
-
-    private function updateProductTable()
-    {
-        foreach ($this->produtos as $produto) {
-            $this->estoqueTable->addRowSet($produto->nome, $produto->quantidade);
-        }
-
-        $this->form->add($this->estoqueTable);
+        return $produtos_disponiveis;
     }
 
     public function onSave()
@@ -128,33 +101,49 @@ class PedidoForm extends TPage
             TTransaction::open('development');
 
             $data = $this->form->getData();
-            
-            $pedido = new Pedido();
-            $pedido->cliente_id = $data->cliente_id;
-            $pedido->total = 0;
-            $pedido->store();
+            $this->validateFormData($data);
 
-            foreach ($this->produtos as $produto) {
-                $pedidoProduto = new PedidoProduto();
-                $pedidoProduto->pedido_id = $pedido->id;
-                $pedidoProduto->produto_id = $produto->id;
-                $pedidoProduto->quantidade = $produto->quantidade;
-                
-                $produtoEntity = new Produto($produto->id);
-                $pedidoProduto->store();
+            $pedido = $this->createPedido($data);
+            $this->addPedidoProduto($pedido, $data);
 
-                $pedido->total += $produtoEntity->preco * $produto->quantidade;
-            }
-
-            $pedido->store();
             TTransaction::close();
 
             new TMessage('info', 'Pedido salvo com sucesso');
             $this->form->clear();
-            $this->produtos = []; // Limpa a lista de produtos após salvar
         } catch (Exception $e) {
             new TMessage('error', $e->getMessage());
             TTransaction::rollback();
         }
+    }
+
+    private function validateFormData($data)
+    {
+        if (empty($data->cliente_id) || empty($data->produto_id) || empty($data->quantidade)) {
+            throw new Exception('Todos os campos são obrigatórios.');
+        }
+    }
+
+    private function createPedido($data)
+    {
+        $pedido = new Pedido();
+        $pedido->cliente_id = $data->cliente_id;
+        $pedido->total = 0;
+        $pedido->store();
+
+        return $pedido;
+    }
+
+    private function addPedidoProduto($pedido, $data)
+    {
+        $pedidoProduto = new PedidoProduto();
+        $pedidoProduto->pedido_id = $pedido->id;
+        $pedidoProduto->produto_id = $data->produto_id;
+        $pedidoProduto->quantidade = $data->quantidade;
+
+        $produto = new Produto($data->produto_id);
+        $pedidoProduto->store();
+
+        $pedido->total += $produto->preco * $data->quantidade;
+        $pedido->store();
     }
 }

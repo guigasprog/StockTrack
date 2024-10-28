@@ -1,7 +1,6 @@
 <?php
 
 use Adianti\Control\TPage;
-use Adianti\Widget\Form\TForm;
 use Adianti\Widget\Form\TEntry;
 use Adianti\Widget\Form\TLabel;
 use Adianti\Widget\Form\TButton;
@@ -9,11 +8,11 @@ use Adianti\Wrapper\BootstrapFormBuilder;
 use Adianti\Database\TTransaction;
 use Adianti\Control\TAction;
 use Adianti\Widget\Wrapper\TDBCombo;
+use Adianti\Widget\Form\TDate;
 
 class ProdutoForm extends TPage
 {
     private $form;
-    private $categoriasAdicionadas; 
 
     public function __construct()
     {
@@ -23,41 +22,54 @@ class ProdutoForm extends TPage
         $this->form->setFormTitle('Cadastro de Produto');
         $this->form->setFieldSizes('100%');
 
+        // Criação dos campos do formulário
+        $this->createFormFields();
+
+        // Adicionando ações ao formulário
+        $this->addActions();
+
+        parent::add($this->form);
+    }
+
+    private function createFormFields()
+    {
         // Campos do formulário
-        $id         = new TEntry('id');
-        $nome       = new TEntry('nome');
-        $descricao  = new TEntry('descricao');
-        $preco      = new TEntry('preco');
-        $validade   = new TDate('validade');
+        $id = new TEntry('id');
+        $nome = new TEntry('nome');
+        $descricao = new TEntry('descricao');
+        $preco = new TEntry('preco');
+        $validade = new TDate('validade');
 
         // ComboBox para selecionar categorias
         $categorias = new TDBCombo('categoria_id', 'development', 'Categoria', 'idCategoria', 'nome', 'nome');
 
-        $id->setEditable(FALSE);
+        // Configurações dos campos
+        $id->setEditable(false);
         $preco->setNumericMask(2, ',', '.', true);
         $validade->setMask('dd/mm/yyyy');
 
         // Adicionando os campos ao formulário
         $row = $this->form->addFields([new TLabel('ID'), $id],
-                                      [new TLabel('Nome'), $nome],
-                                      [new TLabel('Preço por unidade'), $preco]);
+                                       [new TLabel('Nome'), $nome],
+                                       [new TLabel('Preço por unidade'), $preco]);
         $row->layout = ['col-sm-4', 'col-sm-4', 'col-sm-4'];
 
         $row = $this->form->addFields([new TLabel('Descrição'), $descricao],
-                                       [new TLabel('Validade(se tiver)'), $validade]);
+                                       [new TLabel('Validade (se tiver)'), $validade]);
         $row->layout = ['col-sm-6', 'col-sm-6'];
 
         // Adicionando a seleção de categorias
-        $row = $this->form->addFields(  [new TLabel('Categorias'), $categorias]);
+        $row = $this->form->addFields([new TLabel('Categorias'), $categorias]);
         $row->layout = ['col-sm-12'];
-
-        $this->form->addAction('Salvar', new TAction([$this, 'onSave']), 'fas:save');
-        $this->form->addActionLink('Limpar', new TAction([$this, 'onClear']), 'fas:eraser red');
-
-        parent::add($this->form);
     }
 
-        public function onSave()
+    private function addActions()
+    {
+        $this->form->addAction('Salvar', new TAction([$this, 'onSave']), 'fas:save');
+        $this->form->addActionLink('Limpar', new TAction([$this, 'onClear']), 'fas:eraser red');
+    }
+
+    public function onSave()
     {
         try
         {
@@ -65,7 +77,6 @@ class ProdutoForm extends TPage
             $data = $this->form->getData();
             
             $produto = new Produto();
-            $validade = new TDate('validade');
             $produto->fromArray((array) $data);
             
             // Verifica se há uma categoria selecionada
@@ -104,13 +115,7 @@ class ProdutoForm extends TPage
                 // Carrega o produto pelo ID
                 $produto = new Produto($id);
 
-                // Verifica se há uma categoria associada ao produto
-                if (!empty($produto->categoria_id)) {
-                    $categoria = new Categoria($produto->categoria_id);
-                    $produto->categoria_id = $categoria->idCategoria;
-                }
-
-                // Preenche o formulário com os dados do produto e da categoria
+                // Preenche o formulário com os dados do produto
                 $this->form->setData($produto);
 
                 TTransaction::close(); // Fecha a transação
@@ -118,10 +123,8 @@ class ProdutoForm extends TPage
         }
         catch (Exception $e)
         {
-            // Exibe mensagem de erro e faz rollback da transação
             new TMessage('error', $e->getMessage());
-            TTransaction::rollback();
+            TTransaction::rollback(); // Reverte a transação em caso de erro
         }
     }
-
 }

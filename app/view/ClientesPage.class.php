@@ -26,11 +26,11 @@ class ClientesPage extends TPage
 
         // Criar DataGrid para Clientes
         $this->dataGrid = new TDataGrid;
-        $this->dataGrid->addColumn(new TDataGridColumn('id', 'ID', 'right', 50));
-        $this->dataGrid->addColumn(new TDataGridColumn('nome', 'Nome', 'left'));
-        $this->dataGrid->addColumn(new TDataGridColumn('cpf', 'CPF', 'left'));
-        $this->dataGrid->addColumn(new TDataGridColumn('email', 'Email', 'left'));
-        $this->dataGrid->addColumn(new TDataGridColumn('telefone', 'Telefone', 'left'));
+        $this->dataGrid->addColumn(new TDataGridColumn('id', 'ID', 'left', '5%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('nome', 'Nome', 'left', '45%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('cpf', 'CPF', 'left', '10%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('email', 'Email', 'left', '20%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('telefone', 'Telefone', 'left', '20%'));
 
         // Coluna de ações
         $action_edit = new TDataGridAction([$this, 'onEdit'], ['id' => '{id}']);

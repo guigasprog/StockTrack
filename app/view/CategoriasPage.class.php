@@ -24,9 +24,9 @@ class CategoriasPage extends TPage
         $this->form->setFormTitle('Categorias');
 
         $this->dataGrid = new TDataGrid;
-        $this->dataGrid->addColumn(new TDataGridColumn('idCategoria', 'ID', 'right', 50));
-        $this->dataGrid->addColumn(new TDataGridColumn('nome', 'Nome', 'left'));
-        $this->dataGrid->addColumn(new TDataGridColumn('descricao', 'Descrição', 'left'));
+        $this->dataGrid->addColumn(new TDataGridColumn('idCategoria', 'ID', 'left', '5%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('nome', 'Nome', 'left', '70%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('descricao', 'Descrição', 'left', '25%'));
 
         // Coluna de ações
         $action_edit = new TDataGridAction([$this, 'onEdit'], ['id' => '{idCategoria}']);

@@ -24,10 +24,10 @@ class EstoquePage extends TPage
         $this->form->setFormTitle('Estoque');
 
         $this->dataGrid = new TDataGrid;
-        $this->dataGrid->addColumn(new TDataGridColumn('id', 'ID', 'right', 50));
-        $this->dataGrid->addColumn(new TDataGridColumn('produto_nome', 'Produto', 'left'));
-        $this->dataGrid->addColumn(new TDataGridColumn('quantidade', 'Quantidade', 'left', 150));
-        $this->dataGrid->addColumn(new TDataGridColumn('data_entrada', 'Data de Entrada', 'left', 250));
+        $this->dataGrid->addColumn(new TDataGridColumn('id', 'ID', 'left', '5%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('produto_nome', 'Produto', 'left', '45%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('quantidade', 'Quantidade', 'left', '10%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('data_entrada', 'Data de Entrada', 'left', '40%'));
 
         $this->dataGrid->createModel();
 
@@ -46,7 +46,7 @@ class EstoquePage extends TPage
         TTransaction::open('development');
 
         $repository = new TRepository('Estoque');
-        $estoques = $repository->load();
+        $estoques = $repository->orderBy('data_entrada', 'asc')->load();
 
         if ($estoques) {
             $estoquesDTO = [];
