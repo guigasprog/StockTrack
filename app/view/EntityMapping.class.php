@@ -3,11 +3,11 @@ use Adianti\Control\TPage;
 use Adianti\Wrapper\BootstrapDatagridWrapper;
 use Adianti\Widget\Datagrid\TDataGrid;
 use Adianti\Widget\Datagrid\TDataGridColumn;
-use Adianti\Widget\Datagrid\TAction;
+use Adianti\Widget\Datagrid\TDataGridAction;
 use Adianti\Widget\Datagrid\TActionGroup;
-use Adianti\Database\TTransaction;
 use Adianti\Widget\Dialog\TMessage;
-use Adianti\Widget\Util\TTable;
+use Adianti\Widget\Container\TPanelGroup;
+use Adianti\Database\TTransaction;
 
 class EntityMapping extends TPage
 {
@@ -18,13 +18,30 @@ class EntityMapping extends TPage
         parent::__construct();
 
         $this->datagrid = new BootstrapDatagridWrapper(new TDataGrid);
+        $this->datagrid->setHeight(400);
 
-        // Definir as colunas do mapeamento
-        $col_class  = new TDataGridColumn('class', 'Classe', 'left');
-        $col_table  = new TDataGridColumn('table', 'Tabela', 'left');
-        $col_fields = new TDataGridColumn('fields', 'Campos', 'left');
-        $col_relacionamento = new TDataGridColumn('relacionamento', 'Relacionamentos', 'left');
-        $col_entidade_relacionada = new TDataGridColumn('entidade_relacionada', 'Entidade Relacionada', 'left');
+        $col_class = new TDataGridColumn('class', 'Classe', 'left', '15%');
+        $col_class->setTransformer(function($value) {
+            return "<span style='font-weight:bold; color: #2A9D8F;'>$value</span>";
+        });
+
+        $col_table = new TDataGridColumn('table', 'Tabela', 'left', '15%');
+        $col_fields = new TDataGridColumn('fields', 'Campos', 'left', '25%');
+
+        $col_relacionamento = new TDataGridColumn('relacionamento', 'Relacionamento', 'center', '15%');
+        $col_relacionamento->setTransformer(function($value) {
+            if ($value == 'One-to-One') {
+                return '<i class="fas fa-link" style="color:#8E44AD;"></i> ' . $value;
+            } elseif ($value == 'Many-to-One') {
+                return '<i class="fas fa-share-alt" style="color:#3498DB;"></i> ' . $value;
+            } elseif ($value == 'Many-to-Many') {
+                return '<i class="fas fa-project-diagram" style="color:#E74C3C;"></i> ' . $value;
+            } else {
+                return $value;
+            }
+        });
+
+        $col_entidade_relacionada = new TDataGridColumn('entidade_relacionada', 'Entidade Relacionada', 'left', '20%');
 
         $this->datagrid->addColumn($col_class);
         $this->datagrid->addColumn($col_table);
@@ -36,9 +53,9 @@ class EntityMapping extends TPage
 
         $panel = new TPanelGroup('Mapeamento de Entidades');
         $panel->add($this->datagrid);
-        parent::add($panel);
+        $panel->style = 'background:#F9F9F9; border: 1px solid #DDD;';
 
-        // Carregar os dados do mapeamento
+        parent::add($panel);
         $this->onReload();
     }
 
@@ -47,7 +64,6 @@ class EntityMapping extends TPage
         try {
             TTransaction::open('development');
 
-            // Exemplo de mapeamento de entidades manual (você pode ajustar para buscar dinamicamente)
             $entities = [
                 [
                     'class' => 'Estoque', 
@@ -74,6 +90,8 @@ class EntityMapping extends TPage
                     'class' => 'Categoria', 
                     'table' => 'categorias', 
                     'fields' => 'idCategoria, nome, descricao',
+                    'relacionamento' => '',
+                    'entidade_relacionada' => ''
                 ],
                 [
                     'class' => 'Produto', 

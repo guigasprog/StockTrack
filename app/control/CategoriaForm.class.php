@@ -17,7 +17,8 @@ class CategoriaForm extends TPage
         parent::__construct();
         
         $this->form = new BootstrapFormBuilder('form_categoria');
-        $this->form->setFormTitle('Cadastro de Categoria');
+        $this->form->addContent( ['<h4>Cadastro de Categoria</h4><hr>'] );
+        $this->form->setFieldSizes('100%');
         
         $this->initializeFormFields();
         $this->addFormActions();

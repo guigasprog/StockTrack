@@ -16,7 +16,7 @@ class EstoqueForm extends TPage
     {
         parent::__construct();
         $this->form = new BootstrapFormBuilder('form_estoque');
-        $this->form->setFormTitle('Atualizar Estoque');
+        $this->form->addContent( ['<h4>Atualizar Estoque</h4><hr>'] );
         $this->form->setFieldSizes('100%');
 
         $this->addFieldsToForm();
@@ -25,9 +25,6 @@ class EstoqueForm extends TPage
         parent::add($this->form);
     }
 
-    /**
-     * Configura e adiciona os campos ao formulário
-     */
     private function addFieldsToForm()
     {
         $produto_id = $this->createProdutoField();
@@ -37,19 +34,11 @@ class EstoqueForm extends TPage
         $this->form->addFields([new TLabel('Quantidade')], [$quantidade]);
     }
 
-    /**
-     * Cria o campo de seleção de produtos
-     * @return TDBCombo
-     */
     private function createProdutoField()
     {
         return new TDBCombo('produto_id', 'development', 'Produto', 'id', 'nome');
     }
 
-    /**
-     * Cria o campo de entrada para quantidade com máscara
-     * @return TEntry
-     */
     private function createQuantidadeField()
     {
         $quantidade = new TEntry('quantidade');
@@ -57,17 +46,11 @@ class EstoqueForm extends TPage
         return $quantidade;
     }
 
-    /**
-     * Configura e adiciona as ações ao formulário
-     */
     private function addActionsToForm()
     {
         $this->form->addAction('Salvar', new TAction([$this, 'onSave']), 'fa:save');
     }
 
-    /**
-     * Método para salvar os dados no banco
-     */
     public function onSave($param)
     {
         try {

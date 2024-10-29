@@ -18,7 +18,7 @@ class ImagensProdutosForm extends TPage
         parent::__construct();
 
         $this->form = new BootstrapFormBuilder('form_imagens_produtos');
-        $this->form->setFormTitle('Cadastro de Imagens do Produto');
+        $this->form->addContent( ['<h4>Cadastro de Imagens nos Produtos</h4><hr>'] );
         $this->form->setFieldSizes('100%');
 
         $this->createFormFields();

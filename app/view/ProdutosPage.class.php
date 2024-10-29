@@ -20,54 +20,65 @@ class ProdutosPage extends TPage
     {
         parent::__construct();
 
-        // Criação do formulário
+        $this->setupForm();
+        $this->setupDataGrid();
+        $this->form->addContent([$this->dataGrid]);
+
+        // Botão para adicionar produtos
+        $btn_add = new TButton('add');
+        $btn_add->setLabel('Adicionar Produtos');
+        $btn_add->setAction(new TAction([$this, 'onAdd']), 'Adicionar');
+        $this->form->addAction('Adicionar', new TAction([$this, 'onAdd']), 'fas:plus');
+
+        parent::add($this->form);
+
+        $this->loadDataGrid();
+    }
+
+    private function setupForm()
+    {
         $this->form = new BootstrapFormBuilder('form_produtos');
         $this->form->setFormTitle('Produtos');
+    }
 
+    private function setupDataGrid()
+    {
         $this->dataGrid = new TDataGrid;
         $this->dataGrid->addColumn(new TDataGridColumn('id', 'ID', 'left', '5%'));
         $this->dataGrid->addColumn(new TDataGridColumn('nome', 'Nome', 'left', '45%'));
         $this->dataGrid->addColumn(new TDataGridColumn('preco', 'Preço', 'left', '25%'));
         $this->dataGrid->addColumn(new TDataGridColumn('quantidade', 'Quantidade em Estoque', 'left', '25%'));
 
-        $action_edit = new TDataGridAction([$this, 'onEdit'], ['id' => '{id}']);
-        $action_edit->setLabel('Editar');
-        $action_edit->setImage('fas:edit blue');
+        $this->addDataGridActions();
+        $this->dataGrid->createModel();
+    }
 
-        $action_delete = new TDataGridAction([$this, 'onDelete'], ['id' => '{id}']);
-        $action_delete->setLabel('Excluir');
-        $action_delete->setImage('fas:trash-alt red');
-
-        $action_view_address = new TDataGridAction([$this, 'onViewDetails'], ['id' => '{id}']);
-        $action_view_address->setLabel('Ver Mais');
-        $action_view_address->setImage('fas:info green');
+    private function addDataGridActions()
+    {
+        $action_view_more = new TDataGridAction([$this, 'onViewDetails'], ['id' => '{id}']);
+        $action_view_more->setLabel('Ver Mais');
+        $action_view_more->setImage('fas:info green');
 
         $action_view_estoque = new TDataGridAction([$this, 'onViewEstoque'], ['id' => '{id}']);
         $action_view_estoque->setLabel('Ver Estoque');
         $action_view_estoque->setImage('fas:eye green');
 
-        $this->dataGrid->addAction($action_view_address);
+        $action_edit = new TDataGridAction([$this, 'onEdit'], ['id' => '{id}']);
+        $action_edit->setLabel('Editar');
+        $action_edit->setImage('fas:edit blue');
+        
+        $action_delete = new TDataGridAction([$this, 'onDelete'], ['id' => '{id}']);
+        $action_delete->setLabel('Excluir');
+        $action_delete->setImage('fas:trash-alt red');
+        
         $this->dataGrid->addAction($action_view_estoque);
+        $this->dataGrid->addAction($action_view_more);
         $this->dataGrid->addAction($action_edit);
         $this->dataGrid->addAction($action_delete);
 
-        $this->dataGrid->createModel();
-
-        $this->form->addContent([$this->dataGrid]);
-
-        $btn_add = new TButton('add');
-        $btn_add->setLabel('Adicionar Produtos');
-        $btn_add->setAction(new TAction([$this, 'onAdd']), 'Adicionar');
-        $this->form->addAction('Adicionar', new TAction([$this, 'onAdd']), 'fas:plus');
-
-        // Adiciona o formulário à página
-        parent::add($this->form);
-
-        // Carregar os dados no DataGrid
-        $this->loadDataGrid();
     }
 
-    public function loadDataGrid()
+    private function loadDataGrid()
     {
         $this->dataGrid->clear();
         TTransaction::open('development');
@@ -75,25 +86,27 @@ class ProdutosPage extends TPage
         $repository = new TRepository('Produto');
         $produtos = $repository->load();
 
-        foreach($produtos as $produto) {
-            $estoqueRepository = new TRepository('Estoque');
-            $criteria = new TCriteria;
-            $criteria->add(new TFilter('produto_id', '=', $produto->id));
-            $estoques = $estoqueRepository->load($criteria);
-            $qtde = 0;
-            foreach($estoques as $estoque) {
-                $qtde += $estoque->quantidade;
-            }
-            $produto->quantidade = $qtde;
+        foreach ($produtos as $produto) {
+            $produto->quantidade = $this->getEstoqueQuantidade($produto->id);
         }
 
-        // Adicionar os itens à DataGrid
         if ($produtos) {
             $this->dataGrid->addItems($produtos);
         }
 
-        // Fechar a transação
         TTransaction::close();
+    }
+
+    private function getEstoqueQuantidade($produtoId)
+    {
+        $estoqueRepository = new TRepository('Estoque');
+        $criteria = new TCriteria;
+        $criteria->add(new TFilter('produto_id', '=', $produtoId));
+
+        $estoques = $estoqueRepository->load($criteria);
+        $qtde = array_reduce($estoques, fn($sum, $estoque) => $sum + $estoque->quantidade, 0);
+
+        return $qtde;
     }
 
     public function onAdd()
@@ -110,7 +123,6 @@ class ProdutosPage extends TPage
     {
         $action = new TAction([$this, 'Delete']);
         $action->setParameters($param);
-
         new TQuestion('Deseja realmente excluir este cliente?', $action);
     }
 
@@ -118,16 +130,10 @@ class ProdutosPage extends TPage
     {
         try {
             TTransaction::open('development');
-
             $produto = new Produto($param['id']);
-
-            // Excluir cliente
             $produto->delete();
-
-            // Fechar transação
             TTransaction::close();
 
-            // Recarregar o DataGrid
             $this->loadDataGrid();
             new TMessage('info', 'Produto excluído com sucesso!');
         } catch (Exception $e) {
@@ -140,102 +146,96 @@ class ProdutosPage extends TPage
     {
         TTransaction::open('development');
         $produto = new Produto($param['id']);
+        $categoria = $produto->categoria_id ? new Categoria($produto->categoria_id) : null;
 
-        if ($produto->categoria_id) {
-            $categoria = new Categoria($produto->categoria_id);
-
-            $dialogForm = new BootstrapFormBuilder('form_view_address');
-            $dialogForm->setFieldSizes('100%');
-
-            $descricao = new TText('descricao');
-            $categoria_nome = new TEntry('categoria_nome');
-            $categoria_descricao = new TText('categoria_descricao');
-
-            $descricao->setValue($produto->descricao);
-            $categoria_nome->setValue($categoria->nome);
-            $categoria_descricao->setValue($categoria->descricao);
-
-            $categoria_nome->setEditable(false);
-            $descricao->setEditable(false);
-            $categoria_descricao->setEditable(false);
-
-            $categoria_nome->setSize(300); // Defina a largura desejada
-            $descricao->setSize(300, 200); // Defina a largura e altura desejadas
-            $categoria_descricao->setSize(300); // Defina a largura e altura desejadas
-
-            $row = $dialogForm->addFields([new TLabel('Categoria'), $categoria_nome],
-                                        [new TLabel('Detalhes da Categoria'), $categoria_descricao],
-                                        [new TLabel('Descrição'), $descricao]);
-            $row->layout = ['col-sm-4', 'col-sm-8', 'col-sm-12'];
-
-            $imagemRepository = new TRepository('ImagensProduto');
-            $criteria = new TCriteria;
-            $criteria->add(new TFilter('produto_id', '=', $produto->id));
-            $imagens = $imagemRepository->load($criteria);
-
-            if ($imagens) {
-                $imagePanel = new TPanelGroup('Imagens do Produto');
-                $imageTable = new TTable;
-                $imageTable->style = 'width: 100%;';
-                $row = $imageTable->addRow();
-                $row->style = '
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center; 
-                align-items: center
-            ';
-                foreach ($imagens as $imagem) {
-                    $div = new TElement('div');
-
-                    $div->id = 'image_'.$imagem->id;
-
-                    $div->style = '
-                        width: 100px; 
-                        height: 100px; 
-                        background-image: url("data:image/*;base64,'.$imagem->imagem.'"); 
-                        background-size: cover; 
-                        background-position: center; 
-                        background-repeat: no-repeat;
-                    ';
-            
-                    $row->addCell($div)->style = '
-                        width: 150px;
-                        display: flex; 
-                        justify-content: center; 
-                        align-items: center
-                    ';
-                }
-            
-                $imagePanel->add($imageTable);
-                $dialogForm->add($imagePanel);
-            } else {
-                $noImageMessage = new TLabel('Não há imagens cadastradas para este produto.');
-                $noImageMessage->style = 'width: 100%; text-align: center;';
-                $dialogForm->add($noImageMessage);
-            }
-
-            $dialog = new TInputDialog('Detalhes do Produto', $dialogForm);
+        if ($categoria) {
+            $dialogForm = $this->createDetailsDialogForm($produto, $categoria);
+            $this->addImagensToDialog($dialogForm, $produto->id);
+            new TInputDialog('Detalhes do Produto', $dialogForm);
         } else {
-            new TMessage('info', 'Categoria não cadastrado para este Produto.');
+            new TMessage('info', 'Categoria não cadastrada para este Produto.');
         }
 
         TTransaction::close();
+    }
+
+    private function createDetailsDialogForm($produto, $categoria)
+    {
+        $dialogForm = new BootstrapFormBuilder('form_view_address');
+        $dialogForm->setFieldSizes('100%');
+
+        $descricao = new TText('descricao');
+        $descricao->setValue($produto->descricao);
+
+        $categoria_nome = new TEntry('categoria_nome');
+        $categoria_nome->setValue($categoria->nome);
+
+        $categoria_descricao = new TText('categoria_descricao');
+        $categoria_descricao->setValue($categoria->descricao);
+
+        foreach ([$categoria_nome, $descricao, $categoria_descricao] as $field) {
+            $field->setEditable(false);
+        }
+
+        $categoria_nome->setSize(300);
+        $descricao->setSize(300, 200);
+        $categoria_descricao->setSize(300);
+
+        $row = $dialogForm->addFields(
+            [new TLabel('Categoria'), $categoria_nome],
+            [new TLabel('Detalhes da Categoria'), $categoria_descricao],
+            [new TLabel('Descrição'), $descricao]
+        );
+        $row->layout = ['col-sm-4', 'col-sm-8', 'col-sm-12'];
+
+        return $dialogForm;
+    }
+
+
+    private function addImagensToDialog($dialogForm, $produtoId)
+    {
+        $imagemRepository = new TRepository('ImagensProduto');
+        $criteria = new TCriteria;
+        $criteria->add(new TFilter('produto_id', '=', $produtoId));
+        $imagens = $imagemRepository->load($criteria);
+
+        if ($imagens) {
+            $imagePanel = new TPanelGroup('Imagens do Produto');
+            $imageTable = new TTable;
+            $imageTable->style = 'width: 100%;';
+
+            $row = $imageTable->addRow();
+            $row->style = 'display: flex; flex-wrap: wrap; justify-content: center; align-items: center';
+
+            foreach ($imagens as $imagem) {
+                $div = new TElement('div');
+                $div->id = 'image_' . $imagem->id;
+                $div->style = 'width: 100px; height: 100px; background-image: url("data:image/*;base64,' . $imagem->imagem . '"); background-size: cover; background-position: center; background-repeat: no-repeat;';
+                $row->addCell($div)->style = 'width: 150px; display: flex; justify-content: center; align-items: center';
+            }
+
+            $imagePanel->add($imageTable);
+            $dialogForm->add($imagePanel);
+        } else {
+            $noImageMessage = new TLabel('Não há imagens cadastradas para este produto.');
+            $noImageMessage->style = 'width: 100%; text-align: center;';
+            $dialogForm->add($noImageMessage);
+        }
     }
 
     public function onViewEstoque($param)
     {
         try {
             TTransaction::open('development');
-                
             $dialogForm = new BootstrapFormBuilder('form_view_estoque');
             $dialogForm->setFieldSizes('100%');
+
             $estoqueRepository = new TRepository('Estoque');
             $criteria = new TCriteria;
             $criteria->add(new TFilter('produto_id', '=', $param['id']));
             $estoques = $estoqueRepository->load($criteria);
 
             if ($estoques) {
-                    
                 $estoqueTable = new TTable;
                 $estoqueTable->style = 'width: 100%; text-align: center';
                 $estoqueTable->addRowSet('Quantidade', 'Data de Entrada');
@@ -245,21 +245,16 @@ class ProdutosPage extends TPage
                     $data_entrada = $estoque->data_entrada ?? 'N/A';
                     $estoqueTable->addRowSet($quantidade, $data_entrada);
                 }
-                    
-                // Adicionar a tabela ao formulário do diálogo
-                $dialogForm->add($estoqueTable);
 
-                // Criar o diálogo
-                $dialog = new TInputDialog('Estoque do Produto', $dialogForm);
+                $dialogForm->add($estoqueTable);
             } else {
-                new TMessage('info', 'Nenhum estoque encontrado para este produto.');
+                $dialogForm->add(new TLabel('Não há registros de estoque para este produto.'))->style = 'width: 100%; text-align: center;';
             }
 
             TTransaction::close();
-        }
-        catch (Exception $e) {
+            new TInputDialog('Estoque do Produto', $dialogForm);
+        } catch (Exception $e) {
             new TMessage('error', $e->getMessage());
-            TTransaction::rollback();
         }
     }
 }

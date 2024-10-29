@@ -1,4 +1,8 @@
 <menu>
+    <menuitem label="Menu Principal">
+        <icon>fa:map fa-fw</icon>
+        <action>WelcomeView</action>
+    </menuitem>
     <menuitem label='Cadastro'>
         <icon>fa:file-alt fa-fw</icon>
         <menu>
@@ -67,20 +71,6 @@
         </menu>
     </menuitem>
 
-    <menuitem label='Configuração'>
-        <icon>fa:cog fa-fw</icon>
-        <menu>
-            <menuitem label='Ver módulos'>
-                <icon>fa:cube fa-fw</icon>
-                <action>SystemModulesCheckView</action>
-            </menuitem>
-            
-            <menuitem label='Setup PHP'>
-                <icon>fa:code fa-fw</icon>
-                <action>SystemPHPInfoView</action>
-            </menuitem>
-        </menu>
-    </menuitem>
     <menuitem label="Mapeamento de Entidades">
         <icon>fa:map fa-fw</icon>
         <action>EntityMapping</action>

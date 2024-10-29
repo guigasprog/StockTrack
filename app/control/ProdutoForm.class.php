@@ -19,13 +19,11 @@ class ProdutoForm extends TPage
         parent::__construct();
 
         $this->form = new BootstrapFormBuilder('form_produto');
-        $this->form->setFormTitle('Cadastro de Produto');
+        $this->form->addContent( ['<h4>Cadastro de Produto</h4><hr>'] );
         $this->form->setFieldSizes('100%');
 
-        // Criação dos campos do formulário
         $this->createFormFields();
 
-        // Adicionando ações ao formulário
         $this->addActions();
 
         parent::add($this->form);
@@ -33,22 +31,18 @@ class ProdutoForm extends TPage
 
     private function createFormFields()
     {
-        // Campos do formulário
         $id = new TEntry('id');
         $nome = new TEntry('nome');
         $descricao = new TEntry('descricao');
         $preco = new TEntry('preco');
         $validade = new TDate('validade');
 
-        // ComboBox para selecionar categorias
         $categorias = new TDBCombo('categoria_id', 'development', 'Categoria', 'idCategoria', 'nome', 'nome');
 
-        // Configurações dos campos
         $id->setEditable(false);
         $preco->setNumericMask(2, ',', '.', true);
         $validade->setMask('dd/mm/yyyy');
 
-        // Adicionando os campos ao formulário
         $row = $this->form->addFields([new TLabel('ID'), $id],
                                        [new TLabel('Nome'), $nome],
                                        [new TLabel('Preço por unidade'), $preco]);
@@ -58,7 +52,6 @@ class ProdutoForm extends TPage
                                        [new TLabel('Validade (se tiver)'), $validade]);
         $row->layout = ['col-sm-6', 'col-sm-6'];
 
-        // Adicionando a seleção de categorias
         $row = $this->form->addFields([new TLabel('Categorias'), $categorias]);
         $row->layout = ['col-sm-12'];
     }
@@ -79,7 +72,6 @@ class ProdutoForm extends TPage
             $produto = new Produto();
             $produto->fromArray((array) $data);
             
-            // Verifica se há uma categoria selecionada
             if (!empty($data->categoria_id)) {
                 $produto->set_categoria(new Categoria($data->categoria_id));
             }
@@ -106,25 +98,22 @@ class ProdutoForm extends TPage
     {
         try
         {
-            // Verifica se há um ID no parâmetro
             if (isset($param['id']))
             {
                 $id = $param['id'];
-                TTransaction::open('development'); // Abre a transação com o banco
+                TTransaction::open('development');
 
-                // Carrega o produto pelo ID
                 $produto = new Produto($id);
 
-                // Preenche o formulário com os dados do produto
                 $this->form->setData($produto);
 
-                TTransaction::close(); // Fecha a transação
+                TTransaction::close();
             }
         }
         catch (Exception $e)
         {
             new TMessage('error', $e->getMessage());
-            TTransaction::rollback(); // Reverte a transação em caso de erro
+            TTransaction::rollback();
         }
     }
 }

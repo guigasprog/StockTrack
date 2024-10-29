@@ -24,7 +24,8 @@ class PedidoForm extends TPage
         parent::__construct();
         
         $this->form = new BootstrapFormBuilder('form_pedido');
-        $this->form->setFormTitle('Cadastro de Pedido');
+        $this->form->addContent( ['<h4>Cadastro de Pedidos</h4><hr>'] );
+        $this->form->setFieldSizes('100%');
 
         $this->initializeFormFields();
         $this->addFormActions();
