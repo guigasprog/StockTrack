@@ -61,12 +61,37 @@ class ImagensProdutosForm extends TPage
             $imagemProduto->store();
 
             TTransaction::close();
-
+            self::clearTmpAndOutput();
             new TMessage('info', 'Imagem salva com sucesso!');
             $this->form->clear();
         } catch (Exception $e) {
             TTransaction::rollback();
             new TMessage('error', $e->getMessage());
+        }
+    }
+
+    public static function clearTmpAndOutput(): void
+    {
+        $pastas         = ['tmp', 'app/output'];
+        $extensoes     = ['pdf', 'jpg', 'jpeg', 'png', 'xls', 'doc', 'csv', 'html', 'xml', 'rtf'];
+        
+        foreach($pastas as $pasta)
+        {
+            if( !is_dir( $pasta ) ) {
+                die ( "Diretório inválido.\n\n" );
+            }
+            $prepara     = '';
+            $cont     = count($extensoes);
+            
+            foreach($extensoes as $key => $extensao)
+            {
+                $prepara .= $pasta . '/*.' .$extensao; //tmp22/*.pdf,tmp22/*.txt,tmp22/*.jpg,tmp22/*.jpeg,tmp22/*.png
+                $prepara .= ($key < $cont -1) ? ',' : ''; //checa se deve incluir a vírgula pra não entrar após a última extensão
+            }
+            
+            $prepara     = '{' . $prepara . '}';
+            $lista      = glob($prepara, GLOB_BRACE);
+            array_map('unlink', $lista);
         }
     }
 }

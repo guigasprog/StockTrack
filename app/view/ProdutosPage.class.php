@@ -116,14 +116,62 @@ class ProdutosPage extends TPage
 
     public function onEdit($param)
     {
+        TTransaction::open('development');
+        
+        $pedidoProdutoRepository = new TRepository('PedidoProduto');
+        $criteria = new TCriteria;
+        $criteria->add(new TFilter('produto_id', '=', $param['id']));
+        $pedidosProdutos = $pedidoProdutoRepository->load($criteria);
+        
+        if (count($pedidosProdutos) > 0) {
+            $pedidoRepository = new TRepository('Pedido');
+            $criteria = new TCriteria;
+            foreach ($pedidosProdutos as $pedidoProduto) {
+                $criteria->add(new TFilter('id', '=', $pedidoProduto->pedido_id));
+                $criteria->add(new TFilter('status', '=', 'pendente'));
+                $pedidos = $pedidoRepository->count($criteria);
+                if($pedidos > 0) {
+                    new TMessage('error', 'O Produto possui pedidos pendentes e não pode ser editado.');
+                    TTransaction::close();
+                    return;
+                }
+            }
+        }
+
+        TTransaction::close();
+
         AdiantiCoreApplication::loadPage('ProdutoForm', 'onEdit', ['id' => $param['id']]);
     }
 
     public function onDelete($param)
     {
+        TTransaction::open('development');
+        
+        $pedidoProdutoRepository = new TRepository('PedidoProduto');
+        $criteria = new TCriteria;
+        $criteria->add(new TFilter('produto_id', '=', $param['id']));
+        $pedidosProdutos = $pedidoProdutoRepository->load($criteria);
+        
+        if (count($pedidosProdutos) > 0) {
+            $pedidoRepository = new TRepository('Pedido');
+            $criteria = new TCriteria;
+            foreach ($pedidosProdutos as $pedidoProduto) {
+                $criteria->add(new TFilter('id', '=', $pedidoProduto->pedido_id));
+                $criteria->add(new TFilter('status', '=', 'pendente'));
+                $pedidos = $pedidoRepository->count($criteria);
+                if($pedidos > 0) {
+                    new TMessage('error', 'O Produto possui pedidos pendentes e não pode ser excluído ate o pagamento e entrega.');
+                    TTransaction::close();
+                    return;
+                }
+            }
+        }
+
+        TTransaction::close();
+
         $action = new TAction([$this, 'Delete']);
         $action->setParameters($param);
-        new TQuestion('Deseja realmente excluir este cliente?', $action);
+        new TQuestion('Deseja realmente excluir este Produto?', $action);
     }
 
     public function Delete($param)
