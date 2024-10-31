@@ -34,7 +34,7 @@ class ClientesPage extends TPage
 
     private function createDataGrid()
     {
-        $dataGrid = new TDataGrid;
+        $dataGrid = new BootstrapDatagridWrapper(new TDataGrid);
 
         $columns = [
             ['id', 'ID', 'left', '5%'],

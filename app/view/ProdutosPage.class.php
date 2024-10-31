@@ -43,7 +43,7 @@ class ProdutosPage extends TPage
 
     private function setupDataGrid()
     {
-        $this->dataGrid = new TDataGrid;
+        $this->dataGrid = new BootstrapDatagridWrapper(new TDataGrid);
         $this->dataGrid->addColumn(new TDataGridColumn('id', 'ID', 'left', '5%'));
         $this->dataGrid->addColumn(new TDataGridColumn('nome', 'Nome', 'left', '45%'));
         $this->dataGrid->addColumn(new TDataGridColumn('preco', 'Preço', 'left', '25%'));

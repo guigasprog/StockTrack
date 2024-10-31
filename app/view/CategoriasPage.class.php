@@ -49,11 +49,11 @@ class CategoriasPage extends TPage
 
     private function setupDataGrid()
     {
-        $this->dataGrid = new TDataGrid;
+        $this->dataGrid = new BootstrapDatagridWrapper(new TDataGrid);
 
         $this->dataGrid->addColumn(new TDataGridColumn('idCategoria', 'ID', 'left', '5%'));
-        $this->dataGrid->addColumn(new TDataGridColumn('nome', 'Nome', 'left', '70%'));
-        $this->dataGrid->addColumn(new TDataGridColumn('descricao', 'Descrição', 'left', '25%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('nome', 'Nome', 'left', '50%'));
+        $this->dataGrid->addColumn(new TDataGridColumn('descricao', 'Descrição', 'left', '45%'));
 
         $this->dataGrid->addAction($this->createEditAction());
         $this->dataGrid->addAction($this->createDeleteAction());

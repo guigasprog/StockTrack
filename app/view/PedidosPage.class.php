@@ -1,5 +1,7 @@
 <?php
 
+require 'vendor/autoload.php';
+
 use Adianti\Control\TPage;
 use Adianti\Wrapper\BootstrapFormBuilder;
 use Adianti\Widget\Datagrid\TDataGrid;
@@ -24,7 +26,7 @@ class PedidosPage extends TPage
         $this->form = new BootstrapFormBuilder('page_pedidos');
         $this->form->setFormTitle('Pedidos');
 
-        $this->dataGrid = new TDataGrid;
+        $this->dataGrid = new BootstrapDatagridWrapper(new TDataGrid);
         $this->dataGrid->addColumn(new TDataGridColumn('id', 'ID', 'left', '5%'));
         $this->dataGrid->addColumn(new TDataGridColumn('nome_cliente', 'Nome do Cliente', 'left', '45%'));
         $this->dataGrid->addColumn(new TDataGridColumn('total', 'Preço', 'left', '20%'));
@@ -37,12 +39,20 @@ class PedidosPage extends TPage
         $action_view_product = new TDataGridAction([$this, 'onViewProdutos'], ['id' => '{id}']);
         $action_view_product->setLabel('Ver Produtos');
         $action_view_product->setImage('fas:info green');
-        
+
+        $action_geration_pdf = new TDataGridAction([$this, 'generatePDF'], ['id' => '{id}']);
+        $action_geration_pdf->setLabel('Gerar Relatório');
+        $action_geration_pdf->setImage('fa:file');
+
         $this->dataGrid->addAction($action_view_product);
         $this->dataGrid->addAction($action_view_address);
+        $this->dataGrid->addAction($action_geration_pdf);
 
         $this->dataGrid->createModel();
         $this->form->addContent([$this->dataGrid]);
+
+        
+        $this->form->addAction('Gerar Relatório', new TAction([$this, 'generatePDF'], ['id' => '{id}']), 'fas:plus');
 
         parent::add($this->form);
 
@@ -173,4 +183,103 @@ class PedidosPage extends TPage
         $criteria->add(new TFilter('id', '=', $produto_id));
         return $produtoRepository->load($criteria)[0] ?? null;
     }
+
+    public function generatePDF($param)
+    {
+        // TTransaction::open('development');
+
+        // // Obter a conexão do banco de dados
+        // $conn = TTransaction::get(); // Obtenha o objeto de conexão aqui
+        // if (!is_object($conn)) {
+        //     throw new Exception('Conexão com o banco de dados não estabelecida.');
+        // }
+
+        // // Obter o pedido pelo ID
+        // $pedido = new Pedido($param['id']);
+        // if (!$pedido->id) {
+        //     throw new Exception('Pedido não encontrado');
+        // }
+
+        // // Obter nome do cliente
+        // $cliente = new Cliente($pedido->cliente_id);
+        // if (!$cliente->id) {
+        //     throw new Exception('Cliente não encontrado');
+        // }
+        // $clienteNome = $cliente->nome;
+
+        // // Definir a consulta para obter os produtos do pedido
+        // $query = 'SELECT p.id as "id",
+        //                  p.nome as "produto",
+        //                  pp.quantidade as "quantidade",
+        //                  p.preco as "preco_unitario"
+        //           FROM pedido_produto pp
+        //           INNER JOIN produtos p ON pp.produto_id = p.id
+        //           WHERE pp.pedido_id = :pedido_id';
+
+        // // Obter os dados do banco, passando o objeto de conexão
+        // $rows = TDatabase::getData($conn, $query, null, ['pedido_id' => $pedido->id]);
+
+        // if (empty($rows)) {
+        //     throw new Exception('Nenhum produto encontrado para este pedido');
+        // }
+
+        // // Criar um novo documento PDF
+        // $pdf = new TCPDF();
+
+        // // Configurar o documento
+        // $pdf->SetCreator(PDF_CREATOR);
+        // $pdf->SetAuthor('Seu Nome');
+        // $pdf->SetTitle("Pedido - " . $pedido->id);
+        // $pdf->SetMargins(15, 15, 15);
+        // $pdf->SetAutoPageBreak(TRUE, 10);
+        // $pdf->AddPage();
+
+        // // Definir fonte
+        // $pdf->SetFont('helvetica', 'B', 16);
+        // $pdf->Write(0, "Pedido de $clienteNome", '', 0, 'C', true, 0, false, false, 0);
+        // $pdf->Ln(10); // Linha em branco
+
+        // // Criar tabela
+        // $pdf->SetFont('helvetica', 'B', 12);
+        // $html = "<table border=\"1\" cellpadding=\"5\">
+        //             <tr>
+        //                 <th>ID</th>
+        //                 <th>Produto</th>
+        //                 <th>Quantidade</th>
+        //                 <th>Preço Unitário</th>
+        //             </tr>";
+        
+        // // Adicionar produtos à tabela
+        // foreach ($rows as $row) {
+        //     $html .= "<tr>
+        //                 <td>{$row['id']}</td>
+        //                 <td>{$row['produto']}</td>
+        //                 <td>{$row['quantidade']}</td>
+        //                 <td>R$ {$row['preco_unitario']}</td>
+        //               </tr>";
+        // }
+        
+        // $html .= "</table>";
+
+        // // Adicionar HTML ao PDF
+        // $pdf->SetFont('helvetica', '', 12);
+        // $pdf->writeHTML($html, true, false, true, false, '');
+
+        // header('Content-Type: application/pdf');
+        // header('Content-Disposition: inline; filename="pedido_' . $pedido->id . '.pdf"');
+        // header('Cache-Control: private, max-age=0, must-revalidate');
+        // header('Pragma: public');
+        
+        // // Limpar o buffer para evitar conteúdo indesejado antes do PDF
+        // ob_end_clean();
+
+        // // Fechar e gerar o PDF
+        // $pdf->Output('pedido_'.$pedido->id.'.pdf', 'I');
+
+        // // Fechar a transação
+        // TTransaction::close();
+    }
+
+
+
 }

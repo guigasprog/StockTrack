@@ -24,7 +24,7 @@ class EstoquePage extends TPage
         $this->form = new BootstrapFormBuilder('estoque_page');
         $this->form->setFormTitle('Gestão de Estoque');
 
-        $this->dataGrid = new TDataGrid;
+        $this->dataGrid = new BootstrapDatagridWrapper(new TDataGrid);
 
         $this->createColumns();
 

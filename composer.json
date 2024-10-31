@@ -13,7 +13,8 @@
     "pablodalloglio/spreadsheet_excel_writer": "dev-master",
     "pablodalloglio/fpdf": "dev-master",
     "pablodalloglio/phprtflite": "dev-master",
-    "spomky-labs/otphp": "^10.0"
+    "spomky-labs/otphp": "^10.0",
+    "tecnickcom/tcpdf": "^6.7"
   },
   "config": {
     "preferred-install": {
