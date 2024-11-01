@@ -42,7 +42,7 @@ class PedidosPage extends TPage
         $action_view_product = new TDataGridAction([$this, 'onViewProdutos'], ['id' => '{id}']);
         $action_view_product->setLabel('Ver Produtos');
         $action_view_product->setImage('fas:info green');
-        
+
         $action_export_product_pdf = new TDataGridAction([$this, 'onExportProdutosPedidoPDF'], ['id' => '{id}']);
         $action_export_product_pdf->setLabel('Exportar Produtos para PDF');
         $action_export_product_pdf->setImage('far:file-pdf blue');
@@ -212,20 +212,30 @@ class PedidosPage extends TPage
             // Carrega todos os pedidos
             $repository = new TRepository('Pedido');
             $pedidos = $repository->load();
+
+            if (empty($pedidos)) {
+                new TMessage('info', 'Não há pedidos para exportar.');
+                TTransaction::rollback();
+                return; 
+            }
             
-            // Gera HTML para a tabela de pedidos
-            $html = '<h3>Lista de Pedidos</h3>';
-            $html .= '<table border="1" cellpadding="5" cellspacing="0" width="100%">';
-            $html .= '<tr><th>ID</th><th>Nome do Cliente</th><th>Total</th><th>Status</th></tr>';
+            $html = '<h3 style="text-align: center; font-family: Arial, sans-serif;">Lista de Pedidos</h3>';
+            $html .= '<table style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; margin: 20px 0;">';
+            $html .= '<tr style="background-color: #f2f2f2; color: #333; text-align: left;">
+                        <th style="border: 1px solid #dddddd; padding: 8px;">ID</th>
+                        <th style="border: 1px solid #dddddd; padding: 8px;">Nome do Cliente</th>
+                        <th style="border: 1px solid #dddddd; padding: 8px;">Total</th>
+                        <th style="border: 1px solid #dddddd; padding: 8px;">Status</th>
+                    </tr>';
             
             foreach ($pedidos as $pedido) {
                 $cliente = $this->loadCliente($pedido->cliente_id);
                 $nomeCliente = $cliente->nome ?? 'Desconhecido';
                 $html .= "<tr>
-                            <td>{$pedido->id}</td>
-                            <td>{$nomeCliente}</td>
-                            <td>{$pedido->total}</td>
-                            <td>{$pedido->status}</td>
+                            <td style='border: 1px solid #dddddd; padding: 8px;'>{$pedido->id}</td>
+                            <td style='border: 1px solid #dddddd; padding: 8px;'>{$nomeCliente}</td>
+                            <td style='border: 1px solid #dddddd; padding: 8px;'>R$ {$pedido->total}</td>
+                            <td style='border: 1px solid #dddddd; padding: 8px;'>{$pedido->status}</td>
                         </tr>";
             }
             
@@ -257,17 +267,26 @@ class PedidosPage extends TPage
             // Carrega os produtos do pedido específico
             $produtosPedido = $this->loadProdutosPedido($pedido_id);
 
-            $html = '<h3>Produtos do Pedido ID: ' . $pedido_id . '</h3>';
-            $html .= '<table border="1" cellpadding="5" cellspacing="0" width="100%">';
-            $html .= '<tr><th>Nome do Produto</th><th>Quantidade</th></tr>';
+            if (empty($produtosPedido)) {
+                new TMessage('info', 'Não há produtos para este pedido.');
+                TTransaction::rollback();
+                return;
+            }
+
+            $html = '<h3 style="text-align: center; font-family: Arial, sans-serif;">Produtos do Pedido ID: ' . $pedido_id . '</h3>';
+            $html .= '<table style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; margin: 20px 0;">';
+            $html .= '<tr style="background-color: #f2f2f2; color: #333; text-align: left;">
+                        <th style="border: 1px solid #dddddd; padding: 8px;">Nome do Produto</th>
+                        <th style="border: 1px solid #dddddd; padding: 8px;">Quantidade</th>
+                    </tr>';
             
             foreach ($produtosPedido as $pedidoProduto) {
                 $produto = $this->loadProduto($pedidoProduto->produto_id);
                 $nomeProduto = $produto->nome ?? 'Desconhecido';
                 $quantidade = $pedidoProduto->quantidade ?? '0';
                 $html .= "<tr>
-                            <td>{$nomeProduto}</td>
-                            <td>{$quantidade}</td>
+                            <td style='border: 1px solid #dddddd; padding: 8px;'>{$nomeProduto}</td>
+                            <td style='border: 1px solid #dddddd; padding: 8px;'>{$quantidade}</td>
                         </tr>";
             }
             
@@ -284,6 +303,7 @@ class PedidosPage extends TPage
             TTransaction::rollback();
         }
     }
+
 
     private function generatePDF($htmlContent, $fileName, $windowTitle)
     {
