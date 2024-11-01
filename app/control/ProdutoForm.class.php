@@ -44,15 +44,15 @@ class ProdutoForm extends TPage
         $validade->setMask('dd/mm/yyyy');
 
         $row = $this->form->addFields([new TLabel('ID'), $id],
-                                       [new TLabel('Nome'), $nome],
-                                       [new TLabel('Preço por unidade'), $preco]);
+                                       [new TLabel('Nome*'), $nome],
+                                       [new TLabel('Preço por unidade*'), $preco]);
         $row->layout = ['col-sm-4', 'col-sm-4', 'col-sm-4'];
 
         $row = $this->form->addFields([new TLabel('Descrição'), $descricao],
                                        [new TLabel('Validade (se tiver)'), $validade]);
         $row->layout = ['col-sm-6', 'col-sm-6'];
 
-        $row = $this->form->addFields([new TLabel('Categorias'), $categorias]);
+        $row = $this->form->addFields([new TLabel('Categoria*'), $categorias]);
         $row->layout = ['col-sm-12'];
     }
 

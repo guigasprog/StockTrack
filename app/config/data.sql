@@ -60,10 +60,10 @@ CREATE TABLE pedidos (
 
 -- TABELA DE ITENS DO PEDIDO (MANY-TO-MANY ENTRE PEDIDOS E PRODUTOS)
 CREATE TABLE pedido_produto (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     pedido_id INT NOT NULL,
     produto_id INT NOT NULL,
     quantidade INT NOT NULL,
-    PRIMARY KEY (pedido_id, produto_id),
     FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE CASCADE,
     FOREIGN KEY (produto_id) REFERENCES produtos(id)
 );

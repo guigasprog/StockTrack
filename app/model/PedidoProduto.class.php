@@ -4,8 +4,8 @@ use Adianti\Database\TRecord;
 class PedidoProduto extends TRecord
 {
     const TABLENAME = 'pedido_produto';
-    const PRIMARYKEY = 'pedido_id';
-    const IDPOLICY = 'manual';
+    const PRIMARYKEY = 'id';
+    const IDPOLICY = 'serial';
 
     public function __construct($id = NULL)
     {

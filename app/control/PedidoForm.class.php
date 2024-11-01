@@ -47,9 +47,9 @@ class PedidoForm extends TPage
         $quantidade->setValue(1);
 
         $this->form->addFields([new TLabel('ID')], [$id]);
-        $this->form->addFields([new TLabel('Cliente')], [$cliente_id]);
-        $this->form->addFields([new TLabel('Produto')], [$this->produto_id]);
-        $this->form->addFields([new TLabel('Quantidade')], [$quantidade]);
+        $this->form->addFields([new TLabel('Cliente*')], [$cliente_id]);
+        $this->form->addFields([new TLabel('Produto*')], [$this->produto_id]);
+        $this->form->addFields([new TLabel('Quantidade*')], [$quantidade]);
     }
 
     private function addFormActions()
@@ -104,8 +104,16 @@ class PedidoForm extends TPage
             $data = $this->form->getData();
             $this->validateFormData($data);
 
-            $pedido = $this->createPedido($data);
-            $this->addPedidoProduto($pedido, $data);
+            $hoje = date('Y-m-d');
+
+            $pedidoExistente = $this->getPedidoPendenteHoje($data->cliente_id, $hoje);
+
+            if ($pedidoExistente) {
+                $this->addPedidoProduto($pedidoExistente, $data);
+            } else {
+                $pedido = $this->createPedido($data);
+                $this->addPedidoProduto($pedido, $data);
+            }
 
             TTransaction::close();
 
@@ -116,6 +124,20 @@ class PedidoForm extends TPage
             TTransaction::rollback();
         }
     }
+
+    private function getPedidoPendenteHoje($cliente_id, $dataHoje)
+    {
+        $repository = new TRepository('Pedido');
+        $criteria = new TCriteria();
+        $criteria->add(new TFilter('cliente_id', '=', $cliente_id));
+        $criteria->add(new TFilter("DATE(data_pedido)", '=', $dataHoje));  // Extrai apenas a data para comparar
+        $criteria->add(new TFilter('status', '=', 'PENDENTE'));  // Verifique o status como "PENDENTE"
+
+        $pedidos = $repository->load($criteria);
+        return $pedidos ? $pedidos[0] : null;
+    }
+
+
 
     private function validateFormData($data)
     {
@@ -136,6 +158,7 @@ class PedidoForm extends TPage
 
     private function addPedidoProduto($pedido, $data)
     {
+
         $pedidoProduto = new PedidoProduto();
         $pedidoProduto->pedido_id = $pedido->id;
         $pedidoProduto->produto_id = $data->produto_id;

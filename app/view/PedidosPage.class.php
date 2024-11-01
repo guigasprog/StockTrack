@@ -30,7 +30,10 @@ class PedidosPage extends TPage
         $this->dataGrid->addColumn(new TDataGridColumn('id', 'ID', 'left', '5%'));
         $this->dataGrid->addColumn(new TDataGridColumn('nome_cliente', 'Nome do Cliente', 'left', '45%'));
         $this->dataGrid->addColumn(new TDataGridColumn('total', 'Preço', 'left', '20%'));
-        $this->dataGrid->addColumn(new TDataGridColumn('status', 'Status', 'left', '30%'));
+        $status = new TDataGridColumn('status',       'Status',       'left', '30%');
+        $status->setDataProperty('style','font-weight: bold');
+        $status->setTransformer(array($this, 'formatStatus'));
+        $this->dataGrid->addColumn($status);
 
         $action_view_address = new TDataGridAction([$this, 'onViewEndereco'], ['id' => '{id}']);
         $action_view_address->setLabel('Ver Endereço');
@@ -39,24 +42,40 @@ class PedidosPage extends TPage
         $action_view_product = new TDataGridAction([$this, 'onViewProdutos'], ['id' => '{id}']);
         $action_view_product->setLabel('Ver Produtos');
         $action_view_product->setImage('fas:info green');
-
-        $action_geration_pdf = new TDataGridAction([$this, 'generatePDF'], ['id' => '{id}']);
-        $action_geration_pdf->setLabel('Gerar Relatório');
-        $action_geration_pdf->setImage('fa:file');
-
+        
+        $action_export_product_pdf = new TDataGridAction([$this, 'onExportProdutosPedidoPDF'], ['id' => '{id}']);
+        $action_export_product_pdf->setLabel('Exportar Produtos para PDF');
+        $action_export_product_pdf->setImage('far:file-pdf blue');
+    
+        // Adiciona as ações na DataGrid
         $this->dataGrid->addAction($action_view_product);
         $this->dataGrid->addAction($action_view_address);
-        $this->dataGrid->addAction($action_geration_pdf);
+        $this->dataGrid->addAction($action_export_product_pdf);
 
         $this->dataGrid->createModel();
         $this->form->addContent([$this->dataGrid]);
 
-        
-        $this->form->addAction('Gerar Relatório', new TAction([$this, 'generatePDF'], ['id' => '{id}']), 'fas:plus');
+        $this->form->addAction('Exportar Todos Pedidos para PDF', new TAction([$this, 'onExportAllPedidosPDF']), 'far:file-pdf red');
 
         parent::add($this->form);
 
         $this->loadDataGrid();
+    }
+
+    public function formatStatus($status, $object, $row)
+    {
+        if ($status == "pendente")
+        {
+            return "<span style='background-color: #ffb41e; padding: 5px; border-radius: 5px'>$status</span>";
+        }
+        else if($status == "cancelado")
+        {
+            return "<span style='background-color: #ff5046; padding: 5px; border-radius: 5px'>$status</span>";
+        }
+        else if($status == "concluído")
+        {
+            return "<span style='background-color: #64ff5a; padding: 5px; border-radius: 5px'>$status</span>";
+        }
     }
 
     public function loadDataGrid()
@@ -184,101 +203,112 @@ class PedidosPage extends TPage
         return $produtoRepository->load($criteria)[0] ?? null;
     }
 
-    public function generatePDF($param)
+    public function onExportAllPedidosPDF($param)
     {
-        // TTransaction::open('development');
-
-        // // Obter a conexão do banco de dados
-        // $conn = TTransaction::get(); // Obtenha o objeto de conexão aqui
-        // if (!is_object($conn)) {
-        //     throw new Exception('Conexão com o banco de dados não estabelecida.');
-        // }
-
-        // // Obter o pedido pelo ID
-        // $pedido = new Pedido($param['id']);
-        // if (!$pedido->id) {
-        //     throw new Exception('Pedido não encontrado');
-        // }
-
-        // // Obter nome do cliente
-        // $cliente = new Cliente($pedido->cliente_id);
-        // if (!$cliente->id) {
-        //     throw new Exception('Cliente não encontrado');
-        // }
-        // $clienteNome = $cliente->nome;
-
-        // // Definir a consulta para obter os produtos do pedido
-        // $query = 'SELECT p.id as "id",
-        //                  p.nome as "produto",
-        //                  pp.quantidade as "quantidade",
-        //                  p.preco as "preco_unitario"
-        //           FROM pedido_produto pp
-        //           INNER JOIN produtos p ON pp.produto_id = p.id
-        //           WHERE pp.pedido_id = :pedido_id';
-
-        // // Obter os dados do banco, passando o objeto de conexão
-        // $rows = TDatabase::getData($conn, $query, null, ['pedido_id' => $pedido->id]);
-
-        // if (empty($rows)) {
-        //     throw new Exception('Nenhum produto encontrado para este pedido');
-        // }
-
-        // // Criar um novo documento PDF
-        // $pdf = new TCPDF();
-
-        // // Configurar o documento
-        // $pdf->SetCreator(PDF_CREATOR);
-        // $pdf->SetAuthor('Seu Nome');
-        // $pdf->SetTitle("Pedido - " . $pedido->id);
-        // $pdf->SetMargins(15, 15, 15);
-        // $pdf->SetAutoPageBreak(TRUE, 10);
-        // $pdf->AddPage();
-
-        // // Definir fonte
-        // $pdf->SetFont('helvetica', 'B', 16);
-        // $pdf->Write(0, "Pedido de $clienteNome", '', 0, 'C', true, 0, false, false, 0);
-        // $pdf->Ln(10); // Linha em branco
-
-        // // Criar tabela
-        // $pdf->SetFont('helvetica', 'B', 12);
-        // $html = "<table border=\"1\" cellpadding=\"5\">
-        //             <tr>
-        //                 <th>ID</th>
-        //                 <th>Produto</th>
-        //                 <th>Quantidade</th>
-        //                 <th>Preço Unitário</th>
-        //             </tr>";
-        
-        // // Adicionar produtos à tabela
-        // foreach ($rows as $row) {
-        //     $html .= "<tr>
-        //                 <td>{$row['id']}</td>
-        //                 <td>{$row['produto']}</td>
-        //                 <td>{$row['quantidade']}</td>
-        //                 <td>R$ {$row['preco_unitario']}</td>
-        //               </tr>";
-        // }
-        
-        // $html .= "</table>";
-
-        // // Adicionar HTML ao PDF
-        // $pdf->SetFont('helvetica', '', 12);
-        // $pdf->writeHTML($html, true, false, true, false, '');
-
-        // header('Content-Type: application/pdf');
-        // header('Content-Disposition: inline; filename="pedido_' . $pedido->id . '.pdf"');
-        // header('Cache-Control: private, max-age=0, must-revalidate');
-        // header('Pragma: public');
-        
-        // // Limpar o buffer para evitar conteúdo indesejado antes do PDF
-        // ob_end_clean();
-
-        // // Fechar e gerar o PDF
-        // $pdf->Output('pedido_'.$pedido->id.'.pdf', 'I');
-
-        // // Fechar a transação
-        // TTransaction::close();
+        try
+        {
+            TTransaction::open('development');
+            
+            // Carrega todos os pedidos
+            $repository = new TRepository('Pedido');
+            $pedidos = $repository->load();
+            
+            // Gera HTML para a tabela de pedidos
+            $html = '<h3>Lista de Pedidos</h3>';
+            $html .= '<table border="1" cellpadding="5" cellspacing="0" width="100%">';
+            $html .= '<tr><th>ID</th><th>Nome do Cliente</th><th>Total</th><th>Status</th></tr>';
+            
+            foreach ($pedidos as $pedido) {
+                $cliente = $this->loadCliente($pedido->cliente_id);
+                $nomeCliente = $cliente->nome ?? 'Desconhecido';
+                $html .= "<tr>
+                            <td>{$pedido->id}</td>
+                            <td>{$nomeCliente}</td>
+                            <td>{$pedido->total}</td>
+                            <td>{$pedido->status}</td>
+                        </tr>";
+            }
+            
+            $html .= '</table>';
+            
+            TTransaction::close();
+            
+            // Configura e gera o PDF
+            $this->generatePDF($html, 'lista_pedidos.pdf', 'Lista de Pedidos');
+        }
+        catch (Exception $e)
+        {
+            new TMessage('error', $e->getMessage());
+            TTransaction::rollback();
+        }
     }
+
+    public function onExportProdutosPedidoPDF($param)
+    {
+        try
+        {
+            $pedido_id = $param['id'] ?? null;
+            if (!$pedido_id) {
+                throw new Exception('Pedido não especificado.');
+            }
+
+            TTransaction::open('development');
+
+            // Carrega os produtos do pedido específico
+            $produtosPedido = $this->loadProdutosPedido($pedido_id);
+
+            $html = '<h3>Produtos do Pedido ID: ' . $pedido_id . '</h3>';
+            $html .= '<table border="1" cellpadding="5" cellspacing="0" width="100%">';
+            $html .= '<tr><th>Nome do Produto</th><th>Quantidade</th></tr>';
+            
+            foreach ($produtosPedido as $pedidoProduto) {
+                $produto = $this->loadProduto($pedidoProduto->produto_id);
+                $nomeProduto = $produto->nome ?? 'Desconhecido';
+                $quantidade = $pedidoProduto->quantidade ?? '0';
+                $html .= "<tr>
+                            <td>{$nomeProduto}</td>
+                            <td>{$quantidade}</td>
+                        </tr>";
+            }
+            
+            $html .= '</table>';
+
+            TTransaction::close();
+
+            // Configura e gera o PDF
+            $this->generatePDF($html, 'produtos_pedido_' . $pedido_id . '.pdf', 'Produtos do Pedido');
+        }
+        catch (Exception $e)
+        {
+            new TMessage('error', $e->getMessage());
+            TTransaction::rollback();
+        }
+    }
+
+    private function generatePDF($htmlContent, $fileName, $windowTitle)
+    {
+        $options = new \Dompdf\Options();
+        $options->setChroot(getcwd());
+
+        $dompdf = new \Dompdf\Dompdf($options);
+        $dompdf->loadHtml($htmlContent);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        $file = 'app/output/' . $fileName;
+        file_put_contents($file, $dompdf->output());
+
+        $window = TWindow::create($windowTitle, 0.8, 0.8);
+        $object = new TElement('object');
+        $object->data  = $file;
+        $object->type  = 'application/pdf';
+        $object->style = "width: 100%; height:calc(100% - 10px)";
+        $object->add('O navegador não suporta a exibição deste conteúdo, <a style="color:#007bff;" target=_newwindow href="'.$object->data.'"> clique aqui para baixar</a>...');
+
+        $window->add($object);
+        $window->show();
+    }
+
 
 
 
