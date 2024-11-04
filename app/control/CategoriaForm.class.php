@@ -37,7 +37,7 @@ class CategoriaForm extends TPage
         $descricao->setSize('100%');
 
         $this->form->addFields([new TLabel('ID')], [$id]);
-        $this->form->addFields([new TLabel('Nome*')], [$nome]);
+        $this->form->addFields([new TLabel('Nome<span style="color: #a00000">*</span>')], [$nome]);
         $this->form->addFields([new TLabel('Descrição')], [$descricao]);
     }
 

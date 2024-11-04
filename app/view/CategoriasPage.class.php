@@ -25,17 +25,15 @@ class CategoriasPage extends TPage
 
         $this->setupForm();
         $this->setupDataGrid();
+
+        $input_search = new TEntry('search');
+        $input_search->placeholder = _t('Search');
+        $input_search->setSize('100%');
+        $this->dataGrid->enableSearch($input_search, 'idCategoria, nome');
+
+        $this->form->addHeaderWidget( $input_search );
         
         $this->form->addContent([$this->dataGrid]);
-        
-        $btn_add = new TButton('add');
-        $btn_add->setLabel('Adicionar Categoria');
-        $btn_add->setAction(new TAction([$this, 'onAdd']), 'Adicionar');
-        $btn_add->setImage('fas:plus');
-        
-        $this->form->addField($btn_add);
-        $this->form->addAction('Adicionar', new TAction([$this, 'onAdd']), 'fas:plus');
-
         parent::add($this->form);
 
         $this->loadDataGrid();
@@ -45,12 +43,13 @@ class CategoriasPage extends TPage
     {
         $this->form = new BootstrapFormBuilder('form_categorias');
         $this->form->setFormTitle('Categorias');
+        $this->form->addHeaderAction('Adicionar', new TAction([$this, 'onAdd']), 'fas:plus');
     }
 
     private function setupDataGrid()
     {
         $this->dataGrid = new BootstrapDatagridWrapper(new TDataGrid);
-
+        $this->dataGrid->width = '100%';
         $this->dataGrid->addColumn(new TDataGridColumn('idCategoria', 'ID', 'left', '5%'));
         $this->dataGrid->addColumn(new TDataGridColumn('nome', 'Nome', 'left', '50%'));
         $this->dataGrid->addColumn(new TDataGridColumn('descricao', 'Descrição', 'left', '45%'));

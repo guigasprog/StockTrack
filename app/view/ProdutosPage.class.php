@@ -23,12 +23,8 @@ class ProdutosPage extends TPage
         $this->setupForm();
         $this->setupDataGrid();
         $this->form->addContent([$this->dataGrid]);
-
-        // Botão para adicionar produtos
-        $btn_add = new TButton('add');
-        $btn_add->setLabel('Adicionar Produtos');
-        $btn_add->setAction(new TAction([$this, 'onAdd']), 'Adicionar');
-        $this->form->addAction('Adicionar', new TAction([$this, 'onAdd']), 'fas:plus');
+        
+        $this->form->addHeaderAction('Adicionar', new TAction([$this, 'onAdd']), 'fas:plus');
 
         parent::add($this->form);
 

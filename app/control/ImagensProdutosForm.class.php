@@ -37,9 +37,9 @@ class ImagensProdutosForm extends TPage
         $imagem->setAllowedExtensions(['png', 'jpg', 'jpeg']);
         $imagem->enableImageGallery();
 
-        $this->form->addFields([new TLabel('Produto*')], [$produto_id]);
-        $this->form->addFields([new TLabel('Imagem*')], [$imagem]);
-        $this->form->addFields([new TLabel('Descrição')], [$descricao]);
+        $this->form->addFields([new TLabel('Produto<span style="color: #a00000">*</span>')], [$produto_id]);
+        $this->form->addFields([new TLabel('Imagem<span style="color: #a00000">*</span>')], [$imagem]);
+        $this->form->addFields([new TLabel('Descrição<span style="color: #a00000">*</span>')], [$descricao]);
     }
 
     private function addSaveButton()

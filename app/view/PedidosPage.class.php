@@ -37,7 +37,7 @@ class PedidosPage extends TPage
 
         $action_view_address = new TDataGridAction([$this, 'onViewEndereco'], ['id' => '{id}']);
         $action_view_address->setLabel('Ver Endereço');
-        $action_view_address->setImage('fas:eye green');
+        $action_view_address->setImage('fas:route green');
 
         $action_view_product = new TDataGridAction([$this, 'onViewProdutos'], ['id' => '{id}']);
         $action_view_product->setLabel('Ver Produtos');
@@ -55,7 +55,7 @@ class PedidosPage extends TPage
         $this->dataGrid->createModel();
         $this->form->addContent([$this->dataGrid]);
 
-        $this->form->addAction('Exportar Todos Pedidos para PDF', new TAction([$this, 'onExportAllPedidosPDF']), 'far:file-pdf red');
+        $this->form->addHeaderAction('Gerar PDF de Todos Pedidos', new TAction([$this, 'onExportAllPedidosPDF']), 'far:file-pdf red');
 
         parent::add($this->form);
 

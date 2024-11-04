@@ -48,21 +48,21 @@ class ClienteForm extends TPage
         $cpf->setMask('999.999.999-99');
         
         $this->form->addFields([new TLabel('ID'), $id],
-                               [new TLabel('Nome*'), $nome],
-                               [new TLabel('CPF*'), $cpf])->layout = ['col-sm-4', 'col-sm-4', 'col-sm-4'];
+                               [new TLabel('Nome<span style="color: #a00000">*</span>'), $nome],
+                               [new TLabel('CPF<span style="color: #a00000">*</span>'), $cpf])->layout = ['col-sm-4', 'col-sm-4', 'col-sm-4'];
         
         $this->form->addContent(['<h4 style="margin-top: 1%">Contatos do Cliente</h4>']);
-        $this->form->addFields([new TLabel('Telefone*'), $telefone],
-                               [new TLabel('Email*'), $email])->layout = ['col-sm-6', 'col-sm-6'];
+        $this->form->addFields([new TLabel('Telefone<span style="color: #a00000">*</span>'), $telefone],
+                               [new TLabel('Email<span style="color: #a00000">*</span>'), $email])->layout = ['col-sm-6', 'col-sm-6'];
         
         $this->form->addContent(['<h4 style="margin-top: 1%">Endereço do Cliente</h4>']);
-        $this->form->addFields([new TLabel('CEP*'), $cep],
-                               [new TLabel('Logradouro*'), $logradouro],
+        $this->form->addFields([new TLabel('CEP<span style="color: #a00000">*</span>'), $cep],
+                               [new TLabel('Logradouro<span style="color: #a00000">*</span>'), $logradouro],
                                [new TLabel('Número'), $numero])->layout = ['col-sm-3', 'col-sm-6', 'col-sm-3'];
         
-        $this->form->addFields([new TLabel('Cidade*'), $cidade],
-                               [new TLabel('Estado*'), $estado],
-                               [new TLabel('Bairro*'), $bairro])->layout = ['col-sm-4', 'col-sm-4', 'col-sm-4'];
+        $this->form->addFields([new TLabel('Cidade<span style="color: #a00000">*</span>'), $cidade],
+                               [new TLabel('Estado<span style="color: #a00000">*</span>'), $estado],
+                               [new TLabel('Bairro<span style="color: #a00000">*</span>'), $bairro])->layout = ['col-sm-4', 'col-sm-4', 'col-sm-4'];
         
         $this->form->addFields([new TLabel('Complemento'), $complemento])->layout = ['col-sm-12'];
     }

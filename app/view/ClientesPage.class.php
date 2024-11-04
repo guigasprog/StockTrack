@@ -26,7 +26,7 @@ class ClientesPage extends TPage
         $this->dataGrid = $this->createDataGrid();
         $this->form->addContent([$this->dataGrid]);
 
-        $this->form->addAction('Adicionar', new TAction([$this, 'onAdd']), 'fas:plus');
+        $this->form->addHeaderAction('Adicionar', new TAction([$this, 'onAdd']), 'fas:plus');
 
         parent::add($this->form);
         $this->loadDataGrid();

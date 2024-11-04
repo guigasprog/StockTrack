@@ -1,6 +1,6 @@
 <menu>
     <menuitem label="Menu Principal">
-        <icon>fa:map fa-fw</icon>
+        <icon>fas:house fa-fw</icon>
         <action>WelcomeView</action>
     </menuitem>
     <menuitem label='Cadastro'>
@@ -33,7 +33,7 @@
             </menuitem>
             
             <menuitem label='Pedidos'>
-                <icon>fas:clipboard-list fa-fw</icon>
+                <icon>fas:truck fa-fw</icon>
                 <action>PedidoForm</action>
             </menuitem>
             
@@ -44,7 +44,7 @@
         <icon>fa:list-alt fa-fw</icon>
         <menu>
             <menuitem label='Cliente'>
-                <icon>fa:user fa-fw</icon>
+                <icon>fa:users fa-fw</icon>
                 <action>ClientesPage</action>
             </menuitem>
 

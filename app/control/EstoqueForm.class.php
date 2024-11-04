@@ -30,8 +30,8 @@ class EstoqueForm extends TPage
         $produto_id = $this->createProdutoField();
         $quantidade = $this->createQuantidadeField();
 
-        $this->form->addFields([new TLabel('Produto*')], [$produto_id]);
-        $this->form->addFields([new TLabel('Quantidade*')], [$quantidade]);
+        $this->form->addFields([new TLabel('Produto<span style="color: #a00000">*</span>')], [$produto_id]);
+        $this->form->addFields([new TLabel('Quantidade<span style="color: #a00000">*</span>')], [$quantidade]);
     }
 
     private function createProdutoField()

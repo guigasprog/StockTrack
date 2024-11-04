@@ -68,7 +68,7 @@ class EntityMapping extends TPage
                 [
                     'class' => 'Estoque', 
                     'table' => 'estoque', 
-                    'fields' => 'produto_id, quantidade, data_entrada', 
+                    'fields' => 'id, produto_id, quantidade, data_entrada', 
                     'relacionamento' => 'One-to-One', 
                     'entidade_relacionada' => 'Produto'
                 ],

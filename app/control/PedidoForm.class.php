@@ -47,9 +47,9 @@ class PedidoForm extends TPage
         $quantidade->setValue(1);
 
         $this->form->addFields([new TLabel('ID')], [$id]);
-        $this->form->addFields([new TLabel('Cliente*')], [$cliente_id]);
-        $this->form->addFields([new TLabel('Produto*')], [$this->produto_id]);
-        $this->form->addFields([new TLabel('Quantidade*')], [$quantidade]);
+        $this->form->addFields([new TLabel('Cliente<span style="color: #a00000">*</span>')], [$cliente_id]);
+        $this->form->addFields([new TLabel('Produto<span style="color: #a00000">*</span>')], [$this->produto_id]);
+        $this->form->addFields([new TLabel('Quantidade<span style="color: #a00000">*</span>')], [$quantidade]);
     }
 
     private function addFormActions()
