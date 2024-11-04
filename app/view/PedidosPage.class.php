@@ -76,6 +76,14 @@ class PedidosPage extends TPage
         {
             return "<span style='background-color: #64ff5a; padding: 5px; border-radius: 5px'>$status</span>";
         }
+        else if($status == "pagamento efetuado")
+        {
+            return "<span style='background-color: #64ff5a; padding: 5px; border-radius: 5px'>$status</span>";
+        }
+        else if($status == "enviado para entrega")
+        {
+            return "<span style='background-color: #ffb41e; padding: 5px; border-radius: 5px'>$status</span>";
+        }
     }
 
     public function loadDataGrid()

@@ -25,13 +25,6 @@ class CategoriasPage extends TPage
 
         $this->setupForm();
         $this->setupDataGrid();
-
-        $input_search = new TEntry('search');
-        $input_search->placeholder = _t('Search');
-        $input_search->setSize('100%');
-        $this->dataGrid->enableSearch($input_search, 'idCategoria, nome');
-
-        $this->form->addHeaderWidget( $input_search );
         
         $this->form->addContent([$this->dataGrid]);
         parent::add($this->form);

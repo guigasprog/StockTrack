@@ -1,6 +1,6 @@
 <menu>
     <menuitem label="Menu Principal">
-        <icon>fas:house fa-fw</icon>
+        <icon>fas:home fa-fw</icon>
         <action>WelcomeView</action>
     </menuitem>
     <menuitem label='Cadastro'>
@@ -72,7 +72,7 @@
     </menuitem>
 
     <menuitem label="Mapeamento de Entidades">
-        <icon>fa:map fa-fw</icon>
+        <icon>fa:sitemap fa-fw</icon>
         <action>EntityMapping</action>
     </menuitem>
 </menu>

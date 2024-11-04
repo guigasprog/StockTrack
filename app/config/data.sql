@@ -54,7 +54,7 @@ CREATE TABLE pedidos (
     cliente_id INT NOT NULL,
     data_pedido TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     total DECIMAL(10, 2) NOT NULL,
-    status ENUM('pendente', 'concluído', 'cancelado') DEFAULT 'pendente',
+    status ENUM('pendente', 'concluído', 'cancelado', 'pagamento efetuado', 'enviado para entrega') DEFAULT 'pendente',
     FOREIGN KEY (cliente_id) REFERENCES clientes(id)
 );
 
