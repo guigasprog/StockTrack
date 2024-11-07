@@ -23,7 +23,7 @@ class WelcomeView extends TPage
         $vbox->style = 'width: 100%; max-width: 800px; 
         margin: auto; padding: 20px; display: flex; 
         flex-warp: warp; gap: 30px; justify-content: center;
-        align-items: center';
+        align-items: center;';
 
         // Títulos e descrições das funcionalidades
         $items = [
@@ -59,16 +59,16 @@ class WelcomeView extends TPage
     {
         // Criação do card com título
         $card = new TPanelGroup($title);
-        $card->style = 'margin-bottom: 20px; height: 200px';
+        $card->style = 'margin-bottom: 20px; height: 240px';
 
         // Descrição da funcionalidade
         $label = new TLabel($description);
-        $label->style = 'display: block; margin-bottom: 10px;';
+        $label->style = 'display: block; margin-top: 10px;';
 
         // Criação do botão com uma ação associada
         $button = new TButton($pageName);
         $button->setLabel('Ir para ' . $title);
-        $button->setAction(new TAction([$this, 'onView'], ['router' => $pageName]), 'Ir para ' . $title);
+        $button->setAction(new TAction([$this, 'onView'.$pageName]), 'Ir para ' . $title);
         $button->setImage('fa:eye green');
 
         // Adiciona o botão à lista de botões para ser registrado no formulário
@@ -84,8 +84,23 @@ class WelcomeView extends TPage
     /**
      * Ações de navegação para cada funcionalidade
      */
-    public function onView($router)
+    public function onViewProdutosPage()
     {
-        AdiantiCoreApplication::gotoPage($router);
+        AdiantiCoreApplication::gotoPage('ProdutosPage');
+    }
+
+    public function onViewClientesPage()
+    {
+        AdiantiCoreApplication::gotoPage('ClientesPage');
+    }
+
+    public function onViewEstoquePage()
+    {
+        AdiantiCoreApplication::gotoPage('EstoquePage');
+    }
+
+    public function onViewPedidosPage()
+    {
+        AdiantiCoreApplication::gotoPage('PedidosPage');
     }
 }
