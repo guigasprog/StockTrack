@@ -43,6 +43,14 @@ class PedidosPage extends TPage
         $action_view_product->setLabel('Ver Produtos');
         $action_view_product->setImage('fas:info green');
 
+        $action_atualizar_status_pedido = new TDataGridAction([$this, 'atualizarStatusPedido'], ['id' => '{id}', 'acao' => 'atualizar_status']);
+        $action_atualizar_status_pedido->setLabel('Atualizar Status');
+        $action_atualizar_status_pedido->setImage('fa:sync-alt blue');
+
+        $action_cancelar_status_pedido = new TDataGridAction([$this, 'atualizarStatusPedido'], ['id' => '{id}', 'acao' => 'cancelar']);
+        $action_cancelar_status_pedido->setLabel('Cancelar Pedido');
+        $action_cancelar_status_pedido->setImage('fas:ban red');
+
         $action_export_product_pdf = new TDataGridAction([$this, 'onExportProdutosPedidoPDF'], ['id' => '{id}']);
         $action_export_product_pdf->setLabel('Exportar Produtos para PDF');
         $action_export_product_pdf->setImage('far:file-pdf blue');
@@ -50,6 +58,8 @@ class PedidosPage extends TPage
         // Adiciona as ações na DataGrid
         $this->dataGrid->addAction($action_view_product);
         $this->dataGrid->addAction($action_view_address);
+        $this->dataGrid->addAction($action_atualizar_status_pedido);
+        $this->dataGrid->addAction($action_cancelar_status_pedido);
         $this->dataGrid->addAction($action_export_product_pdf);
 
         $this->dataGrid->createModel();
@@ -83,6 +93,59 @@ class PedidosPage extends TPage
         else if($status == "enviado para entrega")
         {
             return "<span style='background-color: #ffb41e; padding: 5px; border-radius: 5px'>$status</span>";
+        }
+    }
+    
+    public static function atualizarStatusPedido($param)
+    {
+        try {
+            TTransaction::open('development');  
+            $pedido_id = $param['id'];
+            $acao = $param['acao'];
+
+            $pedido = new Pedido($pedido_id);
+
+            if ($pedido->status == 'pendente') {
+                if ($acao == 'cancelar') {
+                    $pedido->status = 'cancelado';
+                    $pedido->store();
+                } elseif ($acao == 'atualizar_status') {
+                    $pedido->status = 'pagamento efetuado';
+                    $pedido->store();
+                }
+            } elseif ($pedido->status == 'pagamento efetuado' && $acao == 'atualizar_status') {
+                $pedidosProdutos = PedidoProduto::where('pedido_id', '=', $pedido->id)->get();
+
+                foreach ($pedidosProdutos as $pedidoProduto) {
+                    $produto_id = $pedidoProduto->produto_id;
+                    $quantidade_pedido = $pedidoProduto->quantidade;
+                
+                    $estoque = Estoque::where('produto_id', '=', $produto_id)->orderBy('data_entrada', 'asc')->first();
+
+                    if ($estoque && $estoque->quantidade >= $quantidade_pedido) {
+                        
+                        $estoque->quantidade -= $quantidade_pedido;
+                        $estoque->store();
+                
+                        $pedido->status = 'enviado para entrega';
+                        $pedido->store();
+                        
+                    } else {
+                        throw new TMessage('error', "Estoque insuficiente para o produto $produto_id. Quantidade em estoque: " . ($estoque ? $estoque->quantidade_disponivel : 0));
+                    }
+                }
+                
+            } elseif ($pedido->status == 'enviado para entrega' && $acao == 'atualizar_status') {
+                $pedido->status = 'concluido';
+                $pedido->store();
+            } else {
+                new TMessage('error', "Ação ou status atual inválido.");
+            }
+            TTransaction::close();
+            TApplication::loadPage('PedidosPage');
+        } catch (Exception $e) {
+            TTransaction::rollback();  // Em caso de erro, desfaz a transação
+            new TMessage('error', $e->getMessage());
         }
     }
 
