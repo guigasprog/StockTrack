@@ -205,7 +205,7 @@ class ProdutosPage extends TPage
 
     private function createDetailsDialogForm($produto, $categoria)
     {
-        $dialogForm = new BootstrapFormBuilder('form_view_address');
+        $dialogForm = new BootstrapFormBuilder('form_view_produto_categoria');
         $dialogForm->setFieldSizes('100%');
 
         $descricao = new TText('descricao');
@@ -292,7 +292,9 @@ class ProdutosPage extends TPage
 
                 $dialogForm->add($estoqueTable);
             } else {
-                $dialogForm->add(new TLabel('Não há registros de estoque para este produto.'))->style = 'width: 100%; text-align: center;';
+                $label = new TLabel('Não há registros de estoque para este produto.');
+                $label->style = 'width: 100%; text-align: center;';
+                $dialogForm->add($label);
             }
 
             TTransaction::close();
