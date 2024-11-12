@@ -25,6 +25,7 @@ class PedidosPage extends TPage
 
         $this->form = new BootstrapFormBuilder('page_pedidos');
         $this->form->setFormTitle('Pedidos');
+        $this->form->setFieldSizes('100%');
 
         $this->dataGrid = new BootstrapDatagridWrapper(new TDataGrid);
         $this->dataGrid->addColumn(new TDataGridColumn('id', 'ID', 'left', '5%'));
@@ -34,6 +35,19 @@ class PedidosPage extends TPage
         $status->setDataProperty('style','font-weight: bold');
         $status->setTransformer(array($this, 'formatStatus'));
         $this->dataGrid->addColumn($status);
+
+        $status = new TCombo('status');
+        $status->addItems([
+            '' => 'Remover Filtro',
+            'pendente' => 'Pendente',
+            'pagamento efetuado' => 'Pagamento Efetuado',
+            'enviado para entrega' => 'Enviado para Entrega',
+            'concluído' => 'Concluído',
+            'cancelado' => 'Cancelado'
+        ]);
+        $status->setChangeAction(new TAction([$this, 'onFilterChange']));
+        $row = $this->form->addFields([new TLabel('Status'), $status]);
+        $row->layout = ['col-sm-3'];
 
         $action_view_address = new TDataGridAction([$this, 'onViewEndereco'], ['id' => '{id}']);
         $action_view_address->setLabel('Ver Endereço');
@@ -71,6 +85,14 @@ class PedidosPage extends TPage
 
         $this->loadDataGrid();
     }
+
+    public static function onFilterChange($param)
+    {
+        $status = $param['status'];
+        TSession::setValue('filtro_status', $status);
+        TApplication::loadPage(__CLASS__, 'onReload');
+    }
+
 
     public function formatStatus($status, $object, $row)
     {
@@ -136,7 +158,7 @@ class PedidosPage extends TPage
                 }
                 
             } elseif ($pedido->status == 'enviado para entrega' && $acao == 'atualizar_status') {
-                $pedido->status = 'concluido';
+                $pedido->status = 'concluído';
                 $pedido->store();
             } else {
                 new TMessage('error', "Ação ou status atual inválido.");
@@ -154,7 +176,15 @@ class PedidosPage extends TPage
         try {
             TTransaction::open('development');
             $repository = new TRepository('Pedido');
-            $pedidos = $repository->load();
+
+            $status = TSession::getValue('filtro_status');
+            $repository = new TRepository('Pedido');
+            $criteria = new TCriteria;
+
+            if ($status) {
+                $criteria->add(new TFilter('status', '=', $status));
+            }
+            $pedidos = $repository->load($criteria);
 
             foreach ($pedidos as $pedido) {
                 $cliente = $this->loadCliente($pedido->cliente_id);
@@ -282,8 +312,14 @@ class PedidosPage extends TPage
             
             // Carrega todos os pedidos
             $repository = new TRepository('Pedido');
-            $pedidos = $repository->load();
+            $status = TSession::getValue('filtro_status');
+            $criteria = new TCriteria;
 
+            if ($status) {
+                $criteria->add(new TFilter('status', '=', $status));
+            }
+
+            $pedidos = $repository->load($criteria);
             if (empty($pedidos)) {
                 new TMessage('info', 'Não há pedidos para exportar.');
                 TTransaction::rollback();

@@ -53,6 +53,9 @@ class EstoquePage extends TPage
         $this->form->addHeaderAction('Adicionar', new TAction([$this, 'onAdd']), 'fas:plus');
 
         $this->form->addHeaderAction('Gerar PDF', new TAction([$this, 'onGeneratePDF']), 'far:file-pdf red');
+
+        $this->form->addHeaderAction('Gerar PDF com Pivot e Agrupado', new TAction([$this, 'onGeneratePDFPivotAgrupado']), 'far:file-pdf red');
+        
     }
 
     public function onAdd()
@@ -145,14 +148,83 @@ class EstoquePage extends TPage
         }
     }
 
-    private function generatePDF($htmlContent, $fileName, $windowTitle)
+    public function onGeneratePDFPivotAgrupado()
+    {
+        try {
+            TTransaction::open('development');
+
+            $repository = new TRepository('Estoque');
+            $estoques = $repository->orderBy('data_entrada', 'asc')->load();
+
+            if (empty($estoques)) {
+                new TMessage('info', 'Não há itens em estoque para gerar o PDF.');
+                TTransaction::rollback();
+                return; // Finaliza a execução da função
+            }
+
+            $estoquesPorMes = $this->groupByMonth($estoques);
+
+            $html = '<h3 style="text-align: center; font-family: Arial, sans-serif;">Relatório de Estoque por Mês</h3>';
+            $html .= '<table style="border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; margin: 20px 0;">';
+            $html .= '<tr style="background-color: #f2f2f2; color: #333; text-align: left;">
+                        <th style="border: 1px solid #dddddd; padding: 8px;">Mês</th>
+                        <th style="border: 1px solid #dddddd; padding: 8px;">Quantidade - Produto</th>
+                    </tr>';
+
+            foreach ($estoquesPorMes as $mes => $dados) {
+                $html .= "<tr>
+                            <td style='border: 1px solid #ddd; padding: 8px;'>$mes</td>";
+                foreach ($dados as $produtoNome => $quantidadeTotal) {
+                    $html .= "<td style='border: 1px solid #ddd; padding: 8px;'>$quantidadeTotal - $produtoNome</td>";
+                }
+                $html .= "</tr>";
+            }
+
+            $html .= '</table>';
+
+            TTransaction::close();
+
+            $this->generatePDF($html, 'relatorio_estoque_pivot_agrupado.pdf', 'Relatório de Estoque por Mês', 'landscape');
+        } catch (Exception $e) {
+            new TMessage('error', $e->getMessage());
+            TTransaction::rollback();
+        }
+    }
+
+    private function groupByMonth($estoques)
+    {
+        $result = [];
+
+        foreach ($estoques as $estoque) {
+            $mes = date('m/Y', strtotime($estoque->data_entrada)); // Agrupar por mês e ano
+            $produtoRepository = new TRepository('Produto');
+            $produto = $produtoRepository->where('id', '=', $estoque->produto_id)->load();
+
+            if ($produto) {
+                $produtoNome = $produto[0]->nome;
+                if (!isset($result[$mes])) {
+                    $result[$mes] = [];
+                }
+
+                if (!isset($result[$mes][$produtoNome])) {
+                    $result[$mes][$produtoNome] = 0;
+                }
+
+                $result[$mes][$produtoNome] += $estoque->quantidade;
+            }
+        }
+
+        return $result;
+    }
+
+    private function generatePDF($htmlContent, $fileName, $windowTitle, $scale = "portrait")
     {
         $options = new \Dompdf\Options();
         $options->setChroot(getcwd());
 
         $dompdf = new \Dompdf\Dompdf($options);
         $dompdf->loadHtml($htmlContent);
-        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->setPaper('A4', $scale);
         $dompdf->render();
 
         $file = 'app/output/' . $fileName;
